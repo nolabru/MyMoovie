@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Plus, User } from "lucide-react";
+
 const Home: React.FC<{
   searchQuery?: string;
 }> = ({
@@ -25,7 +26,26 @@ const Home: React.FC<{
   } = useAuth();
   const [typeFilter, setTypeFilter] = useState<TitleType | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<CategoryType | null>(null);
-  const activeTitles = titles.filter(title => !title.deleted && (searchQuery === "" || title.name.toLowerCase().includes(searchQuery.toLowerCase())) && (typeFilter === null || title.type === typeFilter) && (categoryFilter === null || title.category === categoryFilter));
+
+  // Filter out titles with 'assistir' category unless specifically filtered
+  const activeTitles = titles.filter(title => {
+    // Basic filters (deleted status and search query)
+    const baseFilter = !title.deleted && 
+      (searchQuery === "" || title.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    // Type filter
+    const typeFilterMatch = typeFilter === null || title.type === typeFilter;
+    
+    // Category filter - only show 'assistir' category when specifically selected
+    const categoryFilterMatch = 
+      // When a specific category is selected, show only those titles
+      (categoryFilter !== null && title.category === categoryFilter) ||
+      // When no category filter is applied, hide 'assistir' category titles
+      (categoryFilter === null && title.category !== 'assistir');
+    
+    return baseFilter && typeFilterMatch && categoryFilterMatch;
+  });
+
   const handleEdit = (id: string) => {
     navigate(`/editar/${id}`);
   };
@@ -42,6 +62,7 @@ const Home: React.FC<{
     navigate("/adicionar");
   };
   const loading = authLoading || titlesLoading;
+  
   return <div className="container mx-auto py-6 px-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Seus Títulos</h1>
@@ -78,4 +99,5 @@ const Home: React.FC<{
         </div>}
     </div>;
 };
+
 export default Home;
