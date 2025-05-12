@@ -39,14 +39,14 @@ const Filters: React.FC<FiltersProps> = ({
             Tipo
           </label>
           <Select
-            value={typeFilter || ""}
-            onValueChange={(value) => setTypeFilter(value ? value as TitleType : null)}
+            value={typeFilter || "all"}
+            onValueChange={(value) => setTypeFilter(value === "all" ? null : value as TitleType)}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Todos os tipos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os tipos</SelectItem>
+              <SelectItem value="all">Todos os tipos</SelectItem>
               {types.map((type) => (
                 <SelectItem key={type} value={type}>
                   {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -61,14 +61,14 @@ const Filters: React.FC<FiltersProps> = ({
             Categoria
           </label>
           <Select
-            value={categoryFilter || ""}
-            onValueChange={(value) => setCategoryFilter(value ? value as CategoryType : null)}
+            value={categoryFilter || "all"}
+            onValueChange={(value) => setCategoryFilter(value === "all" ? null : value as CategoryType)}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Todas as categorias" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas as categorias</SelectItem>
+              <SelectItem value="all">Todas as categorias</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category} value={category}>
                   {category.charAt(0).toUpperCase() + category.slice(1)}
