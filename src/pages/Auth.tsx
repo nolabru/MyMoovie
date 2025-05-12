@@ -1,13 +1,5 @@
-
 import React, { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -16,20 +8,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import Logo from "@/components/Logo";
 import { useAuth } from "@/contexts/AuthContext";
-
 const Auth: React.FC = () => {
   const navigate = useNavigate();
-  const { signIn, signUp, user } = useAuth();
-  
+  const {
+    signIn,
+    signUp,
+    user
+  } = useAuth();
   const [loginData, setLoginData] = useState({
     email: "",
-    password: "",
+    password: ""
   });
   const [registerData, setRegisterData] = useState({
     name: "",
     email: "",
     password: "",
-    confirmPassword: "",
+    confirmPassword: ""
   });
   const [loading, setLoading] = useState(false);
 
@@ -39,31 +33,32 @@ const Auth: React.FC = () => {
       navigate("/");
     }
   }, [user, navigate]);
-
   const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+    const {
+      name,
+      value
+    } = e.target;
     setLoginData({
       ...loginData,
-      [name]: value,
+      [name]: value
     });
   };
-
   const handleRegisterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+    const {
+      name,
+      value
+    } = e.target;
     setRegisterData({
       ...registerData,
-      [name]: value,
+      [name]: value
     });
   };
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!loginData.email || !loginData.password) {
       toast.error("Por favor, preencha todos os campos");
       return;
     }
-    
     try {
       setLoading(true);
       await signIn(loginData.email, loginData.password);
@@ -74,21 +69,18 @@ const Auth: React.FC = () => {
       setLoading(false);
     }
   };
-
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validações básicas
     if (!registerData.email || !registerData.password || !registerData.confirmPassword) {
       toast.error("Por favor, preencha todos os campos");
       return;
     }
-    
     if (registerData.password !== registerData.confirmPassword) {
       toast.error("As senhas não coincidem");
       return;
     }
-    
     try {
       setLoading(true);
       await signUp(registerData.email, registerData.password);
@@ -99,15 +91,11 @@ const Auth: React.FC = () => {
       setLoading(false);
     }
   };
-
-  return (
-    <div className="container flex items-center justify-center min-h-[80vh] py-8 px-4">
+  return <div className="container flex items-center justify-center min-h-[80vh] py-8 px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Logo />
-          <h2 className="mt-4 text-2xl font-bold">
-            Bem-vindo ao ScreenTrack
-          </h2>
+          <h2 className="mt-4 text-2xl font-bold">Bem-vindo ao MyMoovie</h2>
           <p className="text-muted-foreground mt-1">
             Gerencie seus filmes, séries e novelas favoritos
           </p>
@@ -131,15 +119,7 @@ const Auth: React.FC = () => {
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="login-email">Email</Label>
-                    <Input
-                      id="login-email"
-                      name="email"
-                      type="email"
-                      placeholder="seu@email.com"
-                      value={loginData.email}
-                      onChange={handleLoginChange}
-                      disabled={loading}
-                    />
+                    <Input id="login-email" name="email" type="email" placeholder="seu@email.com" value={loginData.email} onChange={handleLoginChange} disabled={loading} />
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
@@ -148,14 +128,7 @@ const Auth: React.FC = () => {
                         Esqueceu a senha?
                       </Button>
                     </div>
-                    <Input
-                      id="login-password"
-                      name="password"
-                      type="password"
-                      value={loginData.password}
-                      onChange={handleLoginChange}
-                      disabled={loading}
-                    />
+                    <Input id="login-password" name="password" type="password" value={loginData.password} onChange={handleLoginChange} disabled={loading} />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? "Entrando..." : "Entrar"}
@@ -177,50 +150,21 @@ const Auth: React.FC = () => {
                 <form onSubmit={handleRegister} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="register-name">Nome</Label>
-                    <Input
-                      id="register-name"
-                      name="name"
-                      placeholder="Seu nome"
-                      value={registerData.name}
-                      onChange={handleRegisterChange}
-                      disabled={loading}
-                    />
+                    <Input id="register-name" name="name" placeholder="Seu nome" value={registerData.name} onChange={handleRegisterChange} disabled={loading} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="register-email">Email</Label>
-                    <Input
-                      id="register-email"
-                      name="email"
-                      type="email"
-                      placeholder="seu@email.com"
-                      value={registerData.email}
-                      onChange={handleRegisterChange}
-                      disabled={loading}
-                    />
+                    <Input id="register-email" name="email" type="email" placeholder="seu@email.com" value={registerData.email} onChange={handleRegisterChange} disabled={loading} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="register-password">Senha</Label>
-                    <Input
-                      id="register-password"
-                      name="password"
-                      type="password"
-                      value={registerData.password}
-                      onChange={handleRegisterChange}
-                      disabled={loading}
-                    />
+                    <Input id="register-password" name="password" type="password" value={registerData.password} onChange={handleRegisterChange} disabled={loading} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="register-confirm-password">
                       Confirme a senha
                     </Label>
-                    <Input
-                      id="register-confirm-password"
-                      name="confirmPassword"
-                      type="password"
-                      value={registerData.confirmPassword}
-                      onChange={handleRegisterChange}
-                      disabled={loading}
-                    />
+                    <Input id="register-confirm-password" name="confirmPassword" type="password" value={registerData.confirmPassword} onChange={handleRegisterChange} disabled={loading} />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? "Cadastrando..." : "Cadastrar"}
@@ -234,8 +178,6 @@ const Auth: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Auth;
