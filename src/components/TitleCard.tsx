@@ -20,8 +20,8 @@ export interface TitleCardProps {
 
 const TypeColors = {
   filme: 'bg-screentrack-500',
-  série: 'bg-blue-500',
-  novela: 'bg-purple-500',
+  série: 'bg-red-400',
+  novela: 'bg-red-700',
 };
 
 const TitleCard: React.FC<TitleCardProps> = ({
