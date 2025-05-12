@@ -20,13 +20,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Star } from "lucide-react";
+import { Star, Upload, Image } from "lucide-react";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/contexts/AuthContext";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const TitleForm: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addTitle, updateTitle, getTitleById } = useTitles();
+  const { user } = useAuth();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -36,7 +39,19 @@ const TitleForm: React.FC = () => {
     image: "",
   });
 
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
   const isEditing = !!id;
+
+  // Redirecionar se não estiver autenticado
+  useEffect(() => {
+    if (!user) {
+      toast.error("É preciso estar logado para adicionar ou editar títulos");
+      navigate("/login");
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     if (isEditing) {
@@ -49,6 +64,10 @@ const TitleForm: React.FC = () => {
           rating: title.rating,
           image: title.image,
         });
+        
+        if (title.image) {
+          setImagePreview(title.image);
+        }
       } else {
         navigate("/");
       }
@@ -79,7 +98,21 @@ const TitleForm: React.FC = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setImageFile(file);
+      
+      // Criar preview da imagem
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Verifica se existe um título
@@ -88,15 +121,24 @@ const TitleForm: React.FC = () => {
       return;
     }
 
-    if (isEditing) {
-      updateTitle(id, formData);
-      toast.success("Título atualizado com sucesso");
-    } else {
-      addTitle(formData);
-      toast.success("Título adicionado com sucesso");
-    }
+    try {
+      setLoading(true);
+      
+      if (isEditing) {
+        await updateTitle(id, formData, imageFile || undefined);
+        toast.success("Título atualizado com sucesso");
+      } else {
+        await addTitle(formData, imageFile || undefined);
+        toast.success("Título adicionado com sucesso");
+      }
 
-    navigate("/");
+      navigate("/");
+    } catch (error: any) {
+      console.error("Erro ao salvar título:", error);
+      toast.error("Ocorreu um erro ao salvar o título");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -124,6 +166,7 @@ const TitleForm: React.FC = () => {
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="Ex: Stranger Things"
+                disabled={loading}
               />
             </div>
 
@@ -133,6 +176,7 @@ const TitleForm: React.FC = () => {
                 name="type"
                 value={formData.type}
                 onValueChange={(value) => handleSelectChange("type", value)}
+                disabled={loading}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o tipo" />
@@ -151,6 +195,7 @@ const TitleForm: React.FC = () => {
                 name="category"
                 value={formData.category}
                 onValueChange={(value) => handleSelectChange("category", value)}
+                disabled={loading}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione a categoria" />
@@ -177,6 +222,7 @@ const TitleForm: React.FC = () => {
                     variant="ghost"
                     className="p-1 h-auto"
                     onClick={() => handleRatingChange(star)}
+                    disabled={loading}
                   >
                     <Star
                       className={`h-6 w-6 ${
@@ -194,17 +240,59 @@ const TitleForm: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="image">URL da imagem</Label>
-              <Input
-                id="image"
-                name="image"
-                value={formData.image}
-                onChange={handleChange}
-                placeholder="https://exemplo.com/imagem.jpg"
-              />
-              <p className="text-xs text-muted-foreground">
-                Deixe em branco para usar uma imagem padrão
-              </p>
+              <Label htmlFor="image">Imagem</Label>
+              <div className="flex flex-col items-center space-y-4">
+                {imagePreview && (
+                  <div className="relative w-full h-40 rounded-md overflow-hidden">
+                    <img 
+                      src={imagePreview} 
+                      alt="Preview" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                
+                <div className="grid w-full max-w-sm items-center gap-1.5">
+                  <Label htmlFor="image-upload" className="cursor-pointer">
+                    <div className="flex items-center justify-center w-full h-32 border-2 border-dashed rounded-md border-gray-300 px-6 py-6 hover:border-primary transition-colors">
+                      <div className="space-y-1 text-center">
+                        <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
+                        <div className="flex justify-center text-sm text-muted-foreground">
+                          <span>Clique para fazer upload</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          PNG, JPG ou WEBP (max. 5MB)
+                        </p>
+                      </div>
+                    </div>
+                    <input
+                      id="image-upload"
+                      name="image"
+                      type="file"
+                      className="sr-only"
+                      onChange={handleImageChange}
+                      accept="image/*"
+                      disabled={loading}
+                    />
+                  </Label>
+                </div>
+                
+                <div className="w-full">
+                  <Label htmlFor="image-url">Ou informe a URL da imagem</Label>
+                  <Input
+                    id="image-url"
+                    name="image"
+                    value={formData.image}
+                    onChange={handleChange}
+                    placeholder="https://exemplo.com/imagem.jpg"
+                    className="mt-1"
+                    disabled={loading}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Deixe em branco para usar uma imagem padrão
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div className="flex gap-4 pt-4">
@@ -212,11 +300,12 @@ const TitleForm: React.FC = () => {
                 type="button"
                 variant="outline"
                 onClick={() => navigate("/")}
+                disabled={loading}
               >
                 Cancelar
               </Button>
-              <Button type="submit">
-                {isEditing ? "Atualizar" : "Adicionar"}
+              <Button type="submit" disabled={loading}>
+                {loading ? "Salvando..." : isEditing ? "Atualizar" : "Adicionar"}
               </Button>
             </div>
           </form>

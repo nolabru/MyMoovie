@@ -1,6 +1,9 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { TitleType, CategoryType } from "@/components/TitleCard";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "./AuthContext";
+import { toast } from "sonner";
 
 export interface Title {
   id: string;
@@ -10,142 +13,222 @@ export interface Title {
   rating: number;
   image: string;
   deleted: boolean;
+  user_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface TitlesContextType {
   titles: Title[];
-  addTitle: (title: Omit<Title, "id" | "deleted">) => void;
-  updateTitle: (id: string, title: Partial<Title>) => void;
-  deleteTitle: (id: string) => void;
-  restoreTitle: (id: string) => void;
-  permanentlyDeleteTitle: (id: string) => void;
+  loading: boolean;
+  addTitle: (title: Omit<Title, "id" | "deleted" | "user_id">, imageFile?: File) => Promise<void>;
+  updateTitle: (id: string, title: Partial<Title>, imageFile?: File) => Promise<void>;
+  deleteTitle: (id: string) => Promise<void>;
+  restoreTitle: (id: string) => Promise<void>;
+  permanentlyDeleteTitle: (id: string) => Promise<void>;
   getTitleById: (id: string) => Title | undefined;
 }
 
 const TitlesContext = createContext<TitlesContextType | undefined>(undefined);
 
-const demoTitles: Title[] = [
-  {
-    id: "1",
-    name: "Stranger Things",
-    type: "série",
-    category: "ficção",
-    rating: 4.8,
-    image: "https://picsum.photos/id/1/500/300",
-    deleted: false,
-  },
-  {
-    id: "2",
-    name: "O Rei Leão",
-    type: "filme",
-    category: "animação",
-    rating: 4.9,
-    image: "https://picsum.photos/id/2/500/300",
-    deleted: false,
-  },
-  {
-    id: "3",
-    name: "Pantanal",
-    type: "novela",
-    category: "drama",
-    rating: 4.2,
-    image: "https://picsum.photos/id/3/500/300",
-    deleted: false,
-  },
-  {
-    id: "4",
-    name: "A Culpa é das Estrelas",
-    type: "filme",
-    category: "romance",
-    rating: 4.5,
-    image: "https://picsum.photos/id/4/500/300",
-    deleted: false,
-  },
-  {
-    id: "5",
-    name: "Invocação do Mal",
-    type: "filme",
-    category: "terror",
-    rating: 4.3,
-    image: "https://picsum.photos/id/5/500/300",
-    deleted: false,
-  },
-  {
-    id: "6",
-    name: "Brooklyn Nine-Nine",
-    type: "série",
-    category: "comédia",
-    rating: 4.7,
-    image: "https://picsum.photos/id/6/500/300",
-    deleted: false,
-  },
-  {
-    id: "7",
-    name: "A Casa do Dragão",
-    type: "série",
-    category: "ficção",
-    rating: 4.6,
-    image: "https://picsum.photos/id/7/500/300",
-    deleted: false,
-  },
-  {
-    id: "8",
-    name: "Avenida Brasil",
-    type: "novela",
-    category: "drama",
-    rating: 4.4,
-    image: "https://picsum.photos/id/8/500/300",
-    deleted: false,
-  }
-];
-
 export const TitlesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [titles, setTitles] = useState<Title[]>(() => {
-    const savedTitles = localStorage.getItem('titles');
-    return savedTitles ? JSON.parse(savedTitles) : demoTitles;
-  });
+  const [titles, setTitles] = useState<Title[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
+  // Carregar títulos do usuário atual
   useEffect(() => {
-    localStorage.setItem('titles', JSON.stringify(titles));
-  }, [titles]);
+    const fetchTitles = async () => {
+      if (!user) {
+        setTitles([]);
+        setLoading(false);
+        return;
+      }
 
-  const addTitle = (title: Omit<Title, "id" | "deleted">) => {
-    const newTitle = {
-      ...title,
-      id: Date.now().toString(),
-      deleted: false,
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('titles')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        
+        setTitles(data || []);
+      } catch (error: any) {
+        console.error('Erro ao carregar títulos:', error.message);
+        toast.error('Erro ao carregar títulos');
+      } finally {
+        setLoading(false);
+      }
     };
-    setTitles([...titles, newTitle]);
+
+    fetchTitles();
+  }, [user]);
+
+  // Upload de imagem
+  const uploadImage = async (file: File): Promise<string> => {
+    const fileName = `${Math.random().toString(36).substring(2)}-${file.name}`;
+    
+    const { data, error } = await supabase.storage
+      .from('title_images')
+      .upload(`public/${fileName}`, file);
+    
+    if (error) {
+      throw error;
+    }
+    
+    const { data: urlData } = supabase.storage
+      .from('title_images')
+      .getPublicUrl(data.path);
+    
+    return urlData.publicUrl;
   };
 
-  const updateTitle = (id: string, updatedFields: Partial<Title>) => {
-    setTitles(
-      titles.map((title) =>
-        title.id === id ? { ...title, ...updatedFields } : title
-      )
-    );
+  // Adicionar título
+  const addTitle = async (title: Omit<Title, "id" | "deleted" | "user_id">, imageFile?: File) => {
+    if (!user) {
+      toast.error("É necessário estar logado para adicionar títulos");
+      return;
+    }
+    
+    try {
+      let imageUrl = title.image;
+      
+      // Se tiver um arquivo de imagem, fazer upload
+      if (imageFile) {
+        imageUrl = await uploadImage(imageFile);
+      }
+      
+      const newTitle = {
+        ...title,
+        image: imageUrl,
+        user_id: user.id,
+      };
+      
+      const { data, error } = await supabase
+        .from('titles')
+        .insert([newTitle])
+        .select();
+      
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        setTitles([data[0], ...titles]);
+      }
+    } catch (error: any) {
+      console.error('Erro ao adicionar título:', error.message);
+      toast.error('Erro ao adicionar título');
+      throw error;
+    }
   };
 
-  const deleteTitle = (id: string) => {
-    setTitles(
-      titles.map((title) =>
-        title.id === id ? { ...title, deleted: true } : title
-      )
-    );
+  // Atualizar título
+  const updateTitle = async (id: string, updatedFields: Partial<Title>, imageFile?: File) => {
+    if (!user) {
+      toast.error("É necessário estar logado para editar títulos");
+      return;
+    }
+    
+    try {
+      let updates = { ...updatedFields };
+      
+      // Se tiver um arquivo de imagem, fazer upload
+      if (imageFile) {
+        const imageUrl = await uploadImage(imageFile);
+        updates.image = imageUrl;
+      }
+      
+      const { error } = await supabase
+        .from('titles')
+        .update(updates)
+        .eq('id', id)
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      
+      setTitles(
+        titles.map((title) =>
+          title.id === id ? { ...title, ...updates } : title
+        )
+      );
+    } catch (error: any) {
+      console.error('Erro ao atualizar título:', error.message);
+      toast.error('Erro ao atualizar título');
+      throw error;
+    }
   };
 
-  const restoreTitle = (id: string) => {
-    setTitles(
-      titles.map((title) =>
-        title.id === id ? { ...title, deleted: false } : title
-      )
-    );
+  // Marcar como excluído (soft delete)
+  const deleteTitle = async (id: string) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('titles')
+        .update({ deleted: true })
+        .eq('id', id)
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      
+      setTitles(
+        titles.map((title) =>
+          title.id === id ? { ...title, deleted: true } : title
+        )
+      );
+    } catch (error: any) {
+      console.error('Erro ao excluir título:', error.message);
+      toast.error('Erro ao excluir título');
+    }
   };
 
-  const permanentlyDeleteTitle = (id: string) => {
-    setTitles(titles.filter((title) => title.id !== id));
+  // Restaurar título
+  const restoreTitle = async (id: string) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('titles')
+        .update({ deleted: false })
+        .eq('id', id)
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      
+      setTitles(
+        titles.map((title) =>
+          title.id === id ? { ...title, deleted: false } : title
+        )
+      );
+    } catch (error: any) {
+      console.error('Erro ao restaurar título:', error.message);
+      toast.error('Erro ao restaurar título');
+    }
   };
 
+  // Excluir permanentemente
+  const permanentlyDeleteTitle = async (id: string) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('titles')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      
+      setTitles(titles.filter((title) => title.id !== id));
+    } catch (error: any) {
+      console.error('Erro ao excluir permanentemente título:', error.message);
+      toast.error('Erro ao excluir permanentemente título');
+    }
+  };
+
+  // Obter título por ID
   const getTitleById = (id: string) => {
     return titles.find((title) => title.id === id);
   };
@@ -154,6 +237,7 @@ export const TitlesProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     <TitlesContext.Provider
       value={{
         titles,
+        loading,
         addTitle,
         updateTitle,
         deleteTitle,

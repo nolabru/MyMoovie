@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -15,9 +15,12 @@ import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import Logo from "@/components/Logo";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Auth: React.FC = () => {
   const navigate = useNavigate();
+  const { signIn, signUp, user } = useAuth();
+  
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
@@ -28,6 +31,14 @@ const Auth: React.FC = () => {
     password: "",
     confirmPassword: "",
   });
+  const [loading, setLoading] = useState(false);
+
+  // Redirecionar se já estiver autenticado
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -45,25 +56,30 @@ const Auth: React.FC = () => {
     });
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aqui você implementaria a autenticação real
-    // Por enquanto, apenas simularemos um login bem-sucedido
+    
     if (!loginData.email || !loginData.password) {
       toast.error("Por favor, preencha todos os campos");
       return;
     }
     
-    // Simular login bem sucedido
-    toast.success("Login realizado com sucesso!");
-    navigate("/");
+    try {
+      setLoading(true);
+      await signIn(loginData.email, loginData.password);
+      navigate("/");
+    } catch (error) {
+      // Erro já tratado no AuthContext
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validações básicas
-    if (!registerData.name || !registerData.email || !registerData.password || !registerData.confirmPassword) {
+    if (!registerData.email || !registerData.password || !registerData.confirmPassword) {
       toast.error("Por favor, preencha todos os campos");
       return;
     }
@@ -73,9 +89,15 @@ const Auth: React.FC = () => {
       return;
     }
     
-    // Simular cadastro bem sucedido
-    toast.success("Cadastro realizado com sucesso!");
-    navigate("/");
+    try {
+      setLoading(true);
+      await signUp(registerData.email, registerData.password);
+      // Não redirecionamos imediatamente pois o usuário precisa confirmar o email
+    } catch (error) {
+      // Erro já tratado no AuthContext
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -116,12 +138,13 @@ const Auth: React.FC = () => {
                       placeholder="seu@email.com"
                       value={loginData.email}
                       onChange={handleLoginChange}
+                      disabled={loading}
                     />
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <Label htmlFor="login-password">Senha</Label>
-                      <Button variant="link" className="p-0 h-auto text-xs">
+                      <Button variant="link" className="p-0 h-auto text-xs" type="button">
                         Esqueceu a senha?
                       </Button>
                     </div>
@@ -131,10 +154,11 @@ const Auth: React.FC = () => {
                       type="password"
                       value={loginData.password}
                       onChange={handleLoginChange}
+                      disabled={loading}
                     />
                   </div>
-                  <Button type="submit" className="w-full">
-                    Entrar
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? "Entrando..." : "Entrar"}
                   </Button>
                 </form>
               </CardContent>
@@ -159,6 +183,7 @@ const Auth: React.FC = () => {
                       placeholder="Seu nome"
                       value={registerData.name}
                       onChange={handleRegisterChange}
+                      disabled={loading}
                     />
                   </div>
                   <div className="space-y-2">
@@ -170,6 +195,7 @@ const Auth: React.FC = () => {
                       placeholder="seu@email.com"
                       value={registerData.email}
                       onChange={handleRegisterChange}
+                      disabled={loading}
                     />
                   </div>
                   <div className="space-y-2">
@@ -180,6 +206,7 @@ const Auth: React.FC = () => {
                       type="password"
                       value={registerData.password}
                       onChange={handleRegisterChange}
+                      disabled={loading}
                     />
                   </div>
                   <div className="space-y-2">
@@ -192,10 +219,11 @@ const Auth: React.FC = () => {
                       type="password"
                       value={registerData.confirmPassword}
                       onChange={handleRegisterChange}
+                      disabled={loading}
                     />
                   </div>
-                  <Button type="submit" className="w-full">
-                    Cadastrar
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? "Cadastrando..." : "Cadastrar"}
                   </Button>
                 </form>
               </CardContent>
