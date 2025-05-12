@@ -55,7 +55,15 @@ export const TitlesProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
         if (error) throw error;
         
-        setTitles(data || []);
+        // Converter os dados recebidos para o tipo Title
+        const typedData = data?.map(item => ({
+          ...item,
+          type: item.type as TitleType,
+          category: item.category as CategoryType,
+          image: item.image || ''
+        })) || [];
+        
+        setTitles(typedData);
       } catch (error: any) {
         console.error('Erro ao carregar títulos:', error.message);
         toast.error('Erro ao carregar títulos');
@@ -115,7 +123,14 @@ export const TitlesProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       if (error) throw error;
       
       if (data && data.length > 0) {
-        setTitles([data[0], ...titles]);
+        const addedTitle = {
+          ...data[0],
+          type: data[0].type as TitleType,
+          category: data[0].category as CategoryType,
+          image: data[0].image || ''
+        };
+        
+        setTitles([addedTitle, ...titles]);
       }
     } catch (error: any) {
       console.error('Erro ao adicionar título:', error.message);
