@@ -1,9 +1,14 @@
 
 import React from "react";
 import { TitleType, CategoryType } from "./TitleCard";
-import { Button } from "@/components/ui/button";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 import { Filter } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface FiltersProps {
   typeFilter: TitleType | null;
@@ -22,61 +27,56 @@ const Filters: React.FC<FiltersProps> = ({
   setCategoryFilter,
 }) => {
   return (
-    <div className="mb-6 py-4">
-      <div className="flex items-center gap-2 overflow-x-auto pb-2">
-        <div className="flex items-center mr-2">
-          <Filter className="h-4 w-4 mr-2" />
-          <span className="text-sm font-medium">Filtros:</span>
-        </div>
-        
-        <div className="flex-shrink-0">
-          <Button
-            onClick={() => {
-              setTypeFilter(null);
-              setCategoryFilter(null);
-            }}
-            variant="outline"
-            size="sm"
-            className={cn(
-              "rounded-full text-xs",
-              !typeFilter && !categoryFilter ? "bg-primary text-white hover:bg-primary/90" : ""
-            )}
+    <div className="mb-6 space-y-4">
+      <div className="flex items-center gap-2">
+        <Filter className="h-4 w-4" />
+        <span className="text-sm font-medium">Filtros:</span>
+      </div>
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="typeFilter" className="text-sm font-medium mb-1 block">
+            Tipo
+          </label>
+          <Select
+            value={typeFilter || ""}
+            onValueChange={(value) => setTypeFilter(value ? value as TitleType : null)}
           >
-            Todos
-          </Button>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Todos os tipos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todos os tipos</SelectItem>
+              {types.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         
-        {types.map((type) => (
-          <div className="flex-shrink-0" key={type}>
-            <Button
-              onClick={() => setTypeFilter(type)}
-              variant="outline"
-              size="sm"
-              className={cn(
-                "rounded-full text-xs",
-                typeFilter === type ? "bg-primary text-white hover:bg-primary/90" : ""
-              )}
-            >
-              {type.charAt(0).toUpperCase() + type.slice(1)}
-            </Button>
-          </div>
-        ))}
-        
-        {categories.map((category) => (
-          <div className="flex-shrink-0" key={category}>
-            <Button
-              onClick={() => setCategoryFilter(category)}
-              variant="outline"
-              size="sm"
-              className={cn(
-                "rounded-full text-xs",
-                categoryFilter === category ? "bg-secondary text-secondary-foreground hover:bg-secondary/90" : ""
-              )}
-            >
-              {category.charAt(0).toUpperCase() + category.slice(1)}
-            </Button>
-          </div>
-        ))}
+        <div>
+          <label htmlFor="categoryFilter" className="text-sm font-medium mb-1 block">
+            Categoria
+          </label>
+          <Select
+            value={categoryFilter || ""}
+            onValueChange={(value) => setCategoryFilter(value ? value as CategoryType : null)}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Todas as categorias" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todas as categorias</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category} value={category}>
+                  {category.charAt(0).toUpperCase() + category.slice(1)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </div>
   );
