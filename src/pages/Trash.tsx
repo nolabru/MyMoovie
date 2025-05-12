@@ -2,10 +2,10 @@
 import React from "react";
 import { useTitles } from "@/contexts/TitlesContext";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, Trash } from "lucide-react";
+import { ArrowUp, Trash as TrashIcon } from "lucide-react";
 import { toast } from "sonner";
 
-const Trash: React.FC = () => {
+const TrashPage: React.FC = () => {
   const { titles, restoreTitle, permanentlyDeleteTitle } = useTitles();
 
   const deletedTitles = titles.filter((title) => title.deleted);
@@ -71,7 +71,7 @@ const Trash: React.FC = () => {
                     size="sm"
                     onClick={() => handlePermanentDelete(title.id)}
                   >
-                    <Trash className="h-4 w-4 mr-1" />
+                    <TrashIcon className="h-4 w-4 mr-1" />
                     Excluir
                   </Button>
                 </div>
@@ -84,4 +84,4 @@ const Trash: React.FC = () => {
   );
 };
 
-export default Trash;
+export default TrashPage;

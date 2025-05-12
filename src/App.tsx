@@ -8,7 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Home from "./pages/Home";
 import TitleForm from "./pages/TitleForm";
 import Auth from "./pages/Auth";
-import Trash from "./pages/Trash";
+import TrashPage from "./pages/Trash";
 import NotFound from "./pages/NotFound";
 import Navbar from "./components/Navbar";
 import { TitlesProvider } from "./contexts/TitlesContext";
@@ -27,7 +27,7 @@ const App = () => {
             <Route path="/" element={<Home searchQuery={searchQuery} />} />
             <Route path="/adicionar" element={<TitleForm />} />
             <Route path="/editar/:id" element={<TitleForm />} />
-            <Route path="/lixeira" element={<Trash />} />
+            <Route path="/lixeira" element={<TrashPage />} />
             <Route path="/login" element={<Auth />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
