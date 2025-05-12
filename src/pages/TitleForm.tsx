@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTitles } from "@/contexts/TitlesContext";
@@ -208,6 +207,7 @@ const TitleForm: React.FC = () => {
                   <SelectItem value="drama">Drama</SelectItem>
                   <SelectItem value="ficção">Ficção</SelectItem>
                   <SelectItem value="animação">Animação</SelectItem>
+                  <SelectItem value="assistir">Assistir</SelectItem>
                 </SelectContent>
               </Select>
             </div>

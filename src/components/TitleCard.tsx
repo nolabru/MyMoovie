@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 export type TitleType = 'filme' | 'série' | 'novela';
-export type CategoryType = 'comédia' | 'terror' | 'romance' | 'ação' | 'drama' | 'ficção' | 'animação';
+export type CategoryType = 'comédia' | 'terror' | 'romance' | 'ação' | 'drama' | 'ficção' | 'animação' | 'assistir';
 
 export interface TitleCardProps {
   id: string;

@@ -1,11 +1,20 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Menu, User, Plus, Trash, LogOut } from "lucide-react";
+import { Search, Menu, User, Plus, Trash, LogOut, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Logo from "./Logo";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { 
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuTrigger,
+  NavigationMenuContent,
+  NavigationMenuLink,
+} from "@/components/ui/navigation-menu";
+
 interface NavbarProps {
   onSearch: (query: string) => void;
 }

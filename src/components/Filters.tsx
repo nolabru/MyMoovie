@@ -1,3 +1,4 @@
+
 import React from "react";
 import { TitleType, CategoryType } from "./TitleCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,7 +10,7 @@ interface FiltersProps {
   setCategoryFilter: (category: CategoryType | null) => void;
 }
 const types: TitleType[] = ['filme', 'série', 'novela'];
-const categories: CategoryType[] = ['comédia', 'terror', 'romance', 'ação', 'drama', 'ficção', 'animação'];
+const categories: CategoryType[] = ['comédia', 'terror', 'romance', 'ação', 'drama', 'ficção', 'animação', 'assistir'];
 const Filters: React.FC<FiltersProps> = ({
   typeFilter,
   setTypeFilter,
