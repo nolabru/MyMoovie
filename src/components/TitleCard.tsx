@@ -34,6 +34,11 @@ const TitleCard: React.FC<TitleCardProps> = ({
   onEdit,
   onDelete,
 }) => {
+  // Função para capitalizar a primeira letra
+  const capitalize = (text: string) => {
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  };
+
   return (
     <div className="title-card overflow-hidden rounded-xl border bg-card text-card-foreground shadow transition-all hover:shadow-md">
       <div className="relative aspect-video overflow-hidden">
@@ -44,9 +49,9 @@ const TitleCard: React.FC<TitleCardProps> = ({
         />
         <div className="absolute top-2 left-2 flex flex-wrap gap-2">
           <Badge className={`${TypeColors[type]} text-white`}>
-            {type.charAt(0).toUpperCase() + type.slice(1)}
+            {capitalize(type)}
           </Badge>
-          <Badge variant="secondary">{category}</Badge>
+          <Badge variant="secondary">{capitalize(category)}</Badge>
         </div>
         <div className="absolute top-2 right-2 bg-black/50 rounded-full px-2 py-1 flex items-center">
           <Star className="h-3 w-3 text-yellow-400 mr-1" />
