@@ -37,7 +37,7 @@ const Home: React.FC<{
           <p className="text-muted-foreground mb-6">
             {searchQuery || typeFilter || categoryFilter ? "Tente ajustar os filtros ou a busca" : "Adicione seu primeiro título clicando no botão 'Adicionar'"}
           </p>
-        </div> : <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-6">
+        </div> : <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6">
           {activeTitles.map(title => <TitleCard key={title.id} id={title.id} name={title.name} type={title.type} category={title.category} rating={title.rating} image={title.image} onEdit={handleEdit} onDelete={handleDelete} />)}
         </div>}
     </div>;
