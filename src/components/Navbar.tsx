@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Menu, User, Plus, Trash, LogOut } from "lucide-react";
@@ -7,9 +8,11 @@ import Logo from "./Logo";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ThemeToggle from "./ThemeToggle";
+
 interface NavbarProps {
   onSearch: (query: string) => void;
 }
+
 const Navbar: React.FC<NavbarProps> = ({
   onSearch
 }) => {
@@ -20,21 +23,26 @@ const Navbar: React.FC<NavbarProps> = ({
     signOut
   } = useAuth();
   const navigate = useNavigate();
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     onSearch(searchQuery);
   };
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
   const handleSignOut = async () => {
     await signOut();
     navigate("/login");
   };
+
   const getUserInitials = () => {
     if (!user || !user.email) return "U";
     return user.email.charAt(0).toUpperCase();
   };
+
   return <nav className="border-b sticky top-0 bg-background z-50">
       <div className="container mx-auto px-2 flex items-center justify-between">
         <div className="flex items-center">
@@ -122,4 +130,5 @@ const Navbar: React.FC<NavbarProps> = ({
         </div>}
     </nav>;
 };
+
 export default Navbar;

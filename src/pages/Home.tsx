@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import TitleCard from "@/components/TitleCard";
 import Filters from "@/components/Filters";
@@ -8,7 +9,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Plus, User } from "lucide-react";
+
 type SortOption = "name_asc" | "name_desc" | "rating_asc" | "rating_desc" | null;
+
 const Home: React.FC<{
   searchQuery?: string;
 }> = ({
@@ -56,13 +59,16 @@ const Home: React.FC<{
     }
     return 0;
   });
+
   const handleEdit = (id: string) => {
     navigate(`/editar/${id}`);
   };
+
   const handleDelete = (id: string) => {
     deleteTitle(id);
     toast.success("Título movido para a lixeira");
   };
+
   const handleAddTitle = () => {
     if (!user) {
       toast.error("Você precisa estar logado para adicionar títulos");
@@ -71,7 +77,9 @@ const Home: React.FC<{
     }
     navigate("/adicionar");
   };
+
   const loading = authLoading || titlesLoading;
+
   return <div className="container mx-auto py-6 px-4">
       <div className="flex justify-end items-center mb-6">
         
@@ -108,4 +116,5 @@ const Home: React.FC<{
         </div>}
     </div>;
 };
+
 export default Home;
