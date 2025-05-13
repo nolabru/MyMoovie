@@ -35,10 +35,11 @@ const App = () => {
         <TitlesProvider>
           <BrowserRouter>
             <Routes>
-              <Route path="/splash" element={<SplashScreen />} />
+              {/* Splash screen now at root path */}
+              <Route path="/" element={<SplashScreen />} />
               
               {/* Routes with Navbar */}
-              <Route path="/" element={
+              <Route path="/home" element={
                 <>
                   <Navbar onSearch={setSearchQuery} />
                   <Home searchQuery={searchQuery} />

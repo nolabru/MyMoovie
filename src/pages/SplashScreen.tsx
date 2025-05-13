@@ -59,7 +59,7 @@ const SplashScreen = () => {
           </Button>
           <Button 
             variant="outline" 
-            onClick={() => navigate("/")} 
+            onClick={() => navigate("/home")} 
             className="w-full sm:w-auto"
           >
             Explorar sem login
