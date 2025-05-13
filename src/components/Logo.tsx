@@ -13,19 +13,21 @@ const Logo: React.FC = () => {
 
   return (
     <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
-      {theme === "dark" ? (
-        <img 
-          src="/lovable-uploads/8d7930a2-72fe-4495-bc8b-f36845e7e9fc.png" 
-          alt="MyMoovie Logo Dark" 
-          className="h-20" 
-        />
-      ) : (
-        <img 
-          src="/lovable-uploads/2d1d352f-1c83-47f3-8214-1f93d6df5bed.png" 
-          alt="MyMoovie Logo Light" 
-          className="h-20" 
-        />
-      )}
+      <div className="h-20 flex items-center">
+        {theme === "dark" ? (
+          <img 
+            src="/lovable-uploads/8d7930a2-72fe-4495-bc8b-f36845e7e9fc.png" 
+            alt="MyMoovie Logo Dark" 
+            className="h-20 w-auto object-contain" 
+          />
+        ) : (
+          <img 
+            src="/lovable-uploads/2d1d352f-1c83-47f3-8214-1f93d6df5bed.png" 
+            alt="MyMoovie Logo Light" 
+            className="h-20 w-auto object-contain" 
+          />
+        )}
+      </div>
     </div>
   );
 };
