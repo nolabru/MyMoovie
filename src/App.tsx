@@ -14,6 +14,7 @@ import SplashScreen from "./pages/SplashScreen";
 import Navbar from "./components/Navbar";
 import { TitlesProvider } from "./contexts/TitlesContext";
 import { AuthProvider } from "./contexts/AuthContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import PublicOnlyRoute from "./components/PublicOnlyRoute";
 import { useAuth } from "./contexts/AuthContext";
 import Index from "./pages/Index";
@@ -41,77 +42,79 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TitlesProvider>
-          <BrowserRouter>
-            <Routes>
-              {/* Root path redirects based on auth state */}
-              <Route path="/" element={<Index />} />
-              
-              {/* Dashboard - Only accessible when logged in */}
-              <Route path="/home" element={
-                <ProtectedRoute>
-                  <>
-                    <Navbar onSearch={setSearchQuery} />
-                    <Home searchQuery={searchQuery} />
-                  </>
-                </ProtectedRoute>
-              } />
-              
-              {/* Splash screen as presentation route */}
-              <Route path="/apresentacao" element={
-                <PublicOnlyRoute>
-                  <SplashScreen />
-                </PublicOnlyRoute>
-              } />
-              
-              <Route
-                path="/adicionar"
-                element={
+      <ThemeProvider>
+        <AuthProvider>
+          <TitlesProvider>
+            <BrowserRouter>
+              <Routes>
+                {/* Root path redirects based on auth state */}
+                <Route path="/" element={<Index />} />
+                
+                {/* Dashboard - Only accessible when logged in */}
+                <Route path="/home" element={
                   <ProtectedRoute>
                     <>
                       <Navbar onSearch={setSearchQuery} />
-                      <TitleForm />
+                      <Home searchQuery={searchQuery} />
                     </>
                   </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/editar/:id"
-                element={
+                } />
+                
+                {/* Splash screen as presentation route */}
+                <Route path="/apresentacao" element={
+                  <PublicOnlyRoute>
+                    <SplashScreen />
+                  </PublicOnlyRoute>
+                } />
+                
+                <Route
+                  path="/adicionar"
+                  element={
+                    <ProtectedRoute>
+                      <>
+                        <Navbar onSearch={setSearchQuery} />
+                        <TitleForm />
+                      </>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/editar/:id"
+                  element={
+                    <ProtectedRoute>
+                      <>
+                        <Navbar onSearch={setSearchQuery} />
+                        <TitleForm />
+                      </>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/lixeira"
+                  element={
+                    <ProtectedRoute>
+                      <>
+                        <Navbar onSearch={setSearchQuery} />
+                        <TrashPage />
+                      </>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/login" element={<Auth />} />
+                
+                {/* Catch all unknown routes and ensure they redirect to login if unauthenticated */}
+                <Route path="*" element={
                   <ProtectedRoute>
-                    <>
-                      <Navbar onSearch={setSearchQuery} />
-                      <TitleForm />
-                    </>
+                    <NotFound />
                   </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/lixeira"
-                element={
-                  <ProtectedRoute>
-                    <>
-                      <Navbar onSearch={setSearchQuery} />
-                      <TrashPage />
-                    </>
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="/login" element={<Auth />} />
-              
-              {/* Catch all unknown routes and ensure they redirect to login if unauthenticated */}
-              <Route path="*" element={
-                <ProtectedRoute>
-                  <NotFound />
-                </ProtectedRoute>
-              } />
-            </Routes>
-            <Sonner />
-            <Toaster />
-          </BrowserRouter>
-        </TitlesProvider>
-      </AuthProvider>
+                } />
+              </Routes>
+              <Sonner />
+              <Toaster />
+            </BrowserRouter>
+          </TitlesProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 };
