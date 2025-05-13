@@ -18,7 +18,7 @@ import PublicOnlyRoute from "./components/PublicOnlyRoute";
 
 const queryClient = new QueryClient();
 
-// Componente para rotas protegidas
+// Component for protected routes
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem("sb-ulfkuvsweviuggeznfkx-auth-token");
   if (!token) {
@@ -85,6 +85,11 @@ const App = () => {
                 }
               />
               <Route path="/login" element={<Auth />} />
+              
+              {/* Redirect for old home route to prevent 404 */}
+              <Route path="/home" element={<Navigate to="/" replace />} />
+              
+              {/* 404 page for any other routes */}
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Sonner />

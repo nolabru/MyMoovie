@@ -5,14 +5,18 @@ import { useAuth } from "@/contexts/AuthContext";
 
 interface PublicOnlyRouteProps {
   children: React.ReactNode;
+  redirectTo?: string;
 }
 
-const PublicOnlyRoute: React.FC<PublicOnlyRouteProps> = ({ children }) => {
+const PublicOnlyRoute: React.FC<PublicOnlyRouteProps> = ({ 
+  children, 
+  redirectTo = "/" 
+}) => {
   const { user } = useAuth();
   
-  // If the user is logged in, redirect to the home page
+  // If the user is logged in, redirect to the specified route
   if (user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={redirectTo} replace />;
   }
   
   // Otherwise, render the children (splash screen)
