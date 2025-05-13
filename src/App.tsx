@@ -10,6 +10,7 @@ import TitleForm from "./pages/TitleForm";
 import Auth from "./pages/Auth";
 import TrashPage from "./pages/Trash";
 import NotFound from "./pages/NotFound";
+import SplashScreen from "./pages/SplashScreen";
 import Navbar from "./components/Navbar";
 import { TitlesProvider } from "./contexts/TitlesContext";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -33,14 +34,24 @@ const App = () => {
       <AuthProvider>
         <TitlesProvider>
           <BrowserRouter>
-            <Navbar onSearch={setSearchQuery} />
             <Routes>
-              <Route path="/" element={<Home searchQuery={searchQuery} />} />
+              <Route path="/splash" element={<SplashScreen />} />
+              
+              {/* Routes with Navbar */}
+              <Route path="/" element={
+                <>
+                  <Navbar onSearch={setSearchQuery} />
+                  <Home searchQuery={searchQuery} />
+                </>
+              } />
               <Route
                 path="/adicionar"
                 element={
                   <ProtectedRoute>
-                    <TitleForm />
+                    <>
+                      <Navbar onSearch={setSearchQuery} />
+                      <TitleForm />
+                    </>
                   </ProtectedRoute>
                 }
               />
@@ -48,7 +59,10 @@ const App = () => {
                 path="/editar/:id"
                 element={
                   <ProtectedRoute>
-                    <TitleForm />
+                    <>
+                      <Navbar onSearch={setSearchQuery} />
+                      <TitleForm />
+                    </>
                   </ProtectedRoute>
                 }
               />
@@ -56,7 +70,10 @@ const App = () => {
                 path="/lixeira"
                 element={
                   <ProtectedRoute>
-                    <TrashPage />
+                    <>
+                      <Navbar onSearch={setSearchQuery} />
+                      <TrashPage />
+                    </>
                   </ProtectedRoute>
                 }
               />
