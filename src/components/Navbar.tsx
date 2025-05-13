@@ -36,7 +36,7 @@ const Navbar: React.FC<NavbarProps> = ({
     return user.email.charAt(0).toUpperCase();
   };
   return <nav className="border-b sticky top-0 bg-background z-50">
-      <div className="container mx-auto px-2 py-1 flex items-center justify-between">
+      <div className="container mx-auto px-2 flex items-center justify-between">
         <div className="flex items-center">
           <Link to="/home" className="mr-6">
             <Logo />
