@@ -36,20 +36,21 @@ const App = () => {
         <TitlesProvider>
           <BrowserRouter>
             <Routes>
-              {/* Splash screen now wrapped in PublicOnlyRoute */}
+              {/* Dashboard na rota principal */}
               <Route path="/" element={
-                <PublicOnlyRoute>
-                  <SplashScreen />
-                </PublicOnlyRoute>
-              } />
-              
-              {/* Routes with Navbar */}
-              <Route path="/home" element={
                 <>
                   <Navbar onSearch={setSearchQuery} />
                   <Home searchQuery={searchQuery} />
                 </>
               } />
+              
+              {/* Splash screen como rota de apresentação */}
+              <Route path="/apresentacao" element={
+                <PublicOnlyRoute>
+                  <SplashScreen />
+                </PublicOnlyRoute>
+              } />
+              
               <Route
                 path="/adicionar"
                 element={

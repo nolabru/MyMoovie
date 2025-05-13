@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,7 +12,7 @@ const PublicOnlyRoute: React.FC<PublicOnlyRouteProps> = ({ children }) => {
   
   // If the user is logged in, redirect to the home page
   if (user) {
-    return <Navigate to="/home" replace />;
+    return <Navigate to="/" replace />;
   }
   
   // Otherwise, render the children (splash screen)
