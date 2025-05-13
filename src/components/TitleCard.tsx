@@ -3,6 +3,7 @@ import React from "react";
 import { Star, Edit, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export type TitleType = 'filme' | 'série' | 'novela';
 export type CategoryType = 'comédia' | 'terror' | 'romance' | 'ação' | 'drama' | 'ficção' | 'animação' | 'assistir';
@@ -34,6 +35,8 @@ const TitleCard: React.FC<TitleCardProps> = ({
   onEdit,
   onDelete,
 }) => {
+  const isMobile = useIsMobile();
+  
   // Função para capitalizar a primeira letra
   const capitalize = (text: string) => {
     return text.charAt(0).toUpperCase() + text.slice(1);
@@ -76,7 +79,14 @@ const TitleCard: React.FC<TitleCardProps> = ({
         </div>
       </div>
       <div className="p-4">
-        <h3 className="text-lg font-semibold leading-tight truncate">{name}</h3>
+        <h3 className="font-semibold leading-tight truncate 
+          text-base 
+          sm:text-lg 
+          md:text-lg 
+          lg:text-xl"
+        >
+          {name}
+        </h3>
       </div>
     </div>
   );
