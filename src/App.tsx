@@ -14,6 +14,7 @@ import SplashScreen from "./pages/SplashScreen";
 import Navbar from "./components/Navbar";
 import { TitlesProvider } from "./contexts/TitlesContext";
 import { AuthProvider } from "./contexts/AuthContext";
+import PublicOnlyRoute from "./components/PublicOnlyRoute";
 
 const queryClient = new QueryClient();
 
@@ -35,8 +36,12 @@ const App = () => {
         <TitlesProvider>
           <BrowserRouter>
             <Routes>
-              {/* Splash screen now at root path */}
-              <Route path="/" element={<SplashScreen />} />
+              {/* Splash screen now wrapped in PublicOnlyRoute */}
+              <Route path="/" element={
+                <PublicOnlyRoute>
+                  <SplashScreen />
+                </PublicOnlyRoute>
+              } />
               
               {/* Routes with Navbar */}
               <Route path="/home" element={
