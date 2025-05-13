@@ -2,25 +2,32 @@
 import React from "react";
 import { TitleType, CategoryType } from "./TitleCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Filter } from "lucide-react";
+import { Filter, ArrowUpAZ, ArrowDownAZ } from "lucide-react";
+
+type SortOption = "name_asc" | "name_desc" | "rating_asc" | "rating_desc" | null;
+
 interface FiltersProps {
   typeFilter: TitleType | null;
   setTypeFilter: (type: TitleType | null) => void;
   categoryFilter: CategoryType | null;
   setCategoryFilter: (category: CategoryType | null) => void;
+  sortOption: SortOption;
+  setSortOption: (option: SortOption) => void;
 }
+
 const types: TitleType[] = ['filme', 'série', 'novela'];
 const categories: CategoryType[] = ['comédia', 'terror', 'romance', 'ação', 'drama', 'ficção', 'animação', 'assistir'];
+
 const Filters: React.FC<FiltersProps> = ({
   typeFilter,
   setTypeFilter,
   categoryFilter,
-  setCategoryFilter
+  setCategoryFilter,
+  sortOption,
+  setSortOption
 }) => {
   return <div className="mb-6 space-y-4">
-      
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
           <label htmlFor="typeFilter" className="text-sm font-medium mb-1 block">
             Tipo
@@ -54,7 +61,26 @@ const Filters: React.FC<FiltersProps> = ({
             </SelectContent>
           </Select>
         </div>
+        
+        <div>
+          <label htmlFor="sortOption" className="text-sm font-medium mb-1 block">
+            Ordenação
+          </label>
+          <Select value={sortOption || "none"} onValueChange={value => setSortOption(value === "none" ? null : value as SortOption)}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Ordenação padrão" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Ordenação padrão</SelectItem>
+              <SelectItem value="name_asc">Nome (A-Z) <ArrowUpAZ className="inline-block ml-1 h-4 w-4" /></SelectItem>
+              <SelectItem value="name_desc">Nome (Z-A) <ArrowDownAZ className="inline-block ml-1 h-4 w-4" /></SelectItem>
+              <SelectItem value="rating_asc">Nota (menor para maior)</SelectItem>
+              <SelectItem value="rating_desc">Nota (maior para menor)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </div>;
 };
+
 export default Filters;

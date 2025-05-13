@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Plus, User } from "lucide-react";
 
+type SortOption = "name_asc" | "name_desc" | "rating_asc" | "rating_desc" | null;
+
 const Home: React.FC<{
   searchQuery?: string;
 }> = ({
@@ -27,6 +29,7 @@ const Home: React.FC<{
   } = useAuth();
   const [typeFilter, setTypeFilter] = useState<TitleType | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<CategoryType | null>(null);
+  const [sortOption, setSortOption] = useState<SortOption>(null);
 
   // Filter out titles with 'assistir' category unless specifically filtered
   const activeTitles = titles.filter(title => {
@@ -45,15 +48,29 @@ const Home: React.FC<{
       (categoryFilter === null && title.category !== 'assistir');
     
     return baseFilter && typeFilterMatch && categoryFilterMatch;
+  }).sort((a, b) => {
+    // Apply sorting
+    if (sortOption === "name_asc") {
+      return a.name.localeCompare(b.name);
+    } else if (sortOption === "name_desc") {
+      return b.name.localeCompare(a.name);
+    } else if (sortOption === "rating_asc") {
+      return a.rating - b.rating;
+    } else if (sortOption === "rating_desc") {
+      return b.rating - a.rating;
+    }
+    return 0;
   });
 
   const handleEdit = (id: string) => {
     navigate(`/editar/${id}`);
   };
+  
   const handleDelete = (id: string) => {
     deleteTitle(id);
     toast.success("Título movido para a lixeira");
   };
+  
   const handleAddTitle = () => {
     if (!user) {
       toast.error("Você precisa estar logado para adicionar títulos");
@@ -62,6 +79,7 @@ const Home: React.FC<{
     }
     navigate("/adicionar");
   };
+  
   const loading = authLoading || titlesLoading;
   
   return <div className="container mx-auto py-6 px-4">
@@ -73,7 +91,14 @@ const Home: React.FC<{
         </Button>
       </div>
 
-      <Filters typeFilter={typeFilter} setTypeFilter={setTypeFilter} categoryFilter={categoryFilter} setCategoryFilter={setCategoryFilter} />
+      <Filters 
+        typeFilter={typeFilter} 
+        setTypeFilter={setTypeFilter} 
+        categoryFilter={categoryFilter} 
+        setCategoryFilter={setCategoryFilter} 
+        sortOption={sortOption}
+        setSortOption={setSortOption}
+      />
 
       {loading ? <div className="text-center py-10">
           <p className="text-muted-foreground">Carregando...</p>
@@ -93,7 +118,7 @@ const Home: React.FC<{
             Nenhum título encontrado
           </h3>
           <p className="text-muted-foreground mb-6">
-            {searchQuery || typeFilter || categoryFilter ? "Tente ajustar os filtros ou a busca" : "Adicione seu primeiro título clicando no botão 'Adicionar'"}
+            {searchQuery || typeFilter || categoryFilter || sortOption ? "Tente ajustar os filtros ou a busca" : "Adicione seu primeiro título clicando no botão 'Adicionar'"}
           </p>
         </div> : <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6">
           {activeTitles.map(title => <TitleCard key={title.id} id={title.id} name={title.name} type={title.type as TitleType} category={title.category as CategoryType} rating={title.rating} image={title.image} onEdit={handleEdit} onDelete={handleDelete} />)}
