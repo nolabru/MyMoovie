@@ -47,11 +47,10 @@ const TitleCard: React.FC<TitleCardProps> = ({
           alt={name} 
           className="h-full w-full object-cover transition-transform hover:scale-105"
         />
-        <div className="absolute top-2 left-2 flex flex-wrap gap-2">
+        <div className="absolute top-2 left-2">
           <Badge className={`${TypeColors[type]} text-white`}>
             {capitalize(type)}
           </Badge>
-          <Badge variant="secondary">{capitalize(category)}</Badge>
         </div>
         <div className="absolute top-2 right-2 bg-black/50 rounded-full px-2 py-1 flex items-center">
           <Star className="h-3 w-3 text-yellow-400 mr-1" />
@@ -80,6 +79,9 @@ const TitleCard: React.FC<TitleCardProps> = ({
       </div>
       <div className="p-4">
         <h3 className="text-lg font-semibold leading-tight truncate">{name}</h3>
+        <div className="mt-2">
+          <Badge variant="secondary">{capitalize(category)}</Badge>
+        </div>
       </div>
     </div>
   );
