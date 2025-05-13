@@ -17,13 +17,13 @@ const Logo: React.FC = () => {
         <img 
           src="/lovable-uploads/8d7930a2-72fe-4495-bc8b-f36845e7e9fc.png" 
           alt="MyMoovie Logo Dark" 
-          className="h-8" 
+          className="h-20" 
         />
       ) : (
         <img 
           src="/lovable-uploads/2d1d352f-1c83-47f3-8214-1f93d6df5bed.png" 
           alt="MyMoovie Logo Light" 
-          className="h-8" 
+          className="h-20" 
         />
       )}
     </div>
