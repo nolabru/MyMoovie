@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import TitleCard from "@/components/TitleCard";
 import Filters from "@/components/Filters";
@@ -9,9 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Plus, User } from "lucide-react";
-
 type SortOption = "name_asc" | "name_desc" | "rating_asc" | "rating_desc" | null;
-
 const Home: React.FC<{
   searchQuery?: string;
 }> = ({
@@ -34,19 +31,17 @@ const Home: React.FC<{
   // Filter out titles with 'assistir' category unless specifically filtered
   const activeTitles = titles.filter(title => {
     // Basic filters (deleted status and search query)
-    const baseFilter = !title.deleted && 
-      (searchQuery === "" || title.name.toLowerCase().includes(searchQuery.toLowerCase()));
-    
+    const baseFilter = !title.deleted && (searchQuery === "" || title.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
     // Type filter
     const typeFilterMatch = typeFilter === null || title.type === typeFilter;
-    
+
     // Category filter - only show 'assistir' category when specifically selected
-    const categoryFilterMatch = 
-      // When a specific category is selected, show only those titles
-      (categoryFilter !== null && title.category === categoryFilter) ||
-      // When no category filter is applied, hide 'assistir' category titles
-      (categoryFilter === null && title.category !== 'assistir');
-    
+    const categoryFilterMatch =
+    // When a specific category is selected, show only those titles
+    categoryFilter !== null && title.category === categoryFilter ||
+    // When no category filter is applied, hide 'assistir' category titles
+    categoryFilter === null && title.category !== 'assistir';
     return baseFilter && typeFilterMatch && categoryFilterMatch;
   }).sort((a, b) => {
     // Apply sorting
@@ -61,16 +56,13 @@ const Home: React.FC<{
     }
     return 0;
   });
-
   const handleEdit = (id: string) => {
     navigate(`/editar/${id}`);
   };
-  
   const handleDelete = (id: string) => {
     deleteTitle(id);
     toast.success("Título movido para a lixeira");
   };
-  
   const handleAddTitle = () => {
     if (!user) {
       toast.error("Você precisa estar logado para adicionar títulos");
@@ -79,26 +71,17 @@ const Home: React.FC<{
     }
     navigate("/adicionar");
   };
-  
   const loading = authLoading || titlesLoading;
-  
   return <div className="container mx-auto py-6 px-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Seus Títulos</h1>
+      <div className="flex justify-end items-center mb-6">
+        
         <Button onClick={handleAddTitle}>
           <Plus className="h-4 w-4 mr-1" />
           Adicionar Título
         </Button>
       </div>
 
-      <Filters 
-        typeFilter={typeFilter} 
-        setTypeFilter={setTypeFilter} 
-        categoryFilter={categoryFilter} 
-        setCategoryFilter={setCategoryFilter} 
-        sortOption={sortOption}
-        setSortOption={setSortOption}
-      />
+      <Filters typeFilter={typeFilter} setTypeFilter={setTypeFilter} categoryFilter={categoryFilter} setCategoryFilter={setCategoryFilter} sortOption={sortOption} setSortOption={setSortOption} />
 
       {loading ? <div className="text-center py-10">
           <p className="text-muted-foreground">Carregando...</p>
@@ -125,5 +108,4 @@ const Home: React.FC<{
         </div>}
     </div>;
 };
-
 export default Home;
