@@ -1,15 +1,11 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogIn, Film, Star, Clock } from "lucide-react";
 import Logo from "@/components/Logo";
-
 const SplashScreen = () => {
   const navigate = useNavigate();
-
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-white to-gray-100 px-4">
+  return <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-white to-gray-100 px-4">
       <div className="w-full max-w-3xl text-center">
         {/* Logo Section */}
         <div className="mb-10 flex justify-center">
@@ -50,24 +46,13 @@ const SplashScreen = () => {
         
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button 
-            onClick={() => navigate("/login")} 
-            className="w-full sm:w-auto"
-          >
+          <Button onClick={() => navigate("/login")} className="w-full sm:w-auto">
             <LogIn className="h-4 w-4 mr-1" />
             Entrar na conta
           </Button>
-          <Button 
-            variant="outline" 
-            onClick={() => navigate("/home")} 
-            className="w-full sm:w-auto"
-          >
-            Explorar sem login
-          </Button>
+          
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default SplashScreen;
