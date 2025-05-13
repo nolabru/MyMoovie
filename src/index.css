@@ -29,7 +29,7 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
+    --border: 0 0% 85%; /* Alterado para um cinza neutro */
     --input: 214.3 31.8% 91.4%;
     --ring: 0 91% 60%;
 
@@ -61,7 +61,7 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
+    --border: 0 0% 25%; /* Alterado para um cinza escuro neutro */
     --input: 217.2 32.6% 17.5%;
     --ring: 0 91% 60%;
   }
