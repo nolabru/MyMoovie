@@ -22,7 +22,7 @@ const queryClient = new QueryClient();
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem("sb-ulfkuvsweviuggeznfkx-auth-token");
   if (!token) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/apresentacao" replace />;
   }
   return <>{children}</>;
 };
@@ -36,12 +36,14 @@ const App = () => {
         <TitlesProvider>
           <BrowserRouter>
             <Routes>
-              {/* Dashboard na rota principal */}
+              {/* Dashboard na rota principal - Only accessible when logged in */}
               <Route path="/" element={
-                <>
-                  <Navbar onSearch={setSearchQuery} />
-                  <Home searchQuery={searchQuery} />
-                </>
+                <ProtectedRoute>
+                  <>
+                    <Navbar onSearch={setSearchQuery} />
+                    <Home searchQuery={searchQuery} />
+                  </>
+                </ProtectedRoute>
               } />
               
               {/* Splash screen como rota de apresentação */}
@@ -86,10 +88,7 @@ const App = () => {
               />
               <Route path="/login" element={<Auth />} />
               
-              {/* Redirect for old home route to prevent 404 */}
-              <Route path="/home" element={<Navigate to="/" replace />} />
-              
-              {/* 404 page for any other routes */}
+              {/* Root path needs to check auth status and redirect */}
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Sonner />
