@@ -11,7 +11,7 @@ const Index = () => {
   
   // If user is logged in, go to dashboard, otherwise to presentation
   if (user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/home" replace />;
   } else {
     return <Navigate to="/apresentacao" replace />;
   }

@@ -15,15 +15,24 @@ import Navbar from "./components/Navbar";
 import { TitlesProvider } from "./contexts/TitlesContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import PublicOnlyRoute from "./components/PublicOnlyRoute";
+import { useAuth } from "./contexts/AuthContext";
+import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
 
-// Component for protected routes
+// Improved component for protected routes
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const token = localStorage.getItem("sb-ulfkuvsweviuggeznfkx-auth-token");
-  if (!token) {
+  const { user, loading } = useAuth();
+  
+  // If still loading auth state, show nothing to prevent flash
+  if (loading) return null;
+  
+  // If no user is logged in, redirect to presentation page
+  if (!user) {
     return <Navigate to="/apresentacao" replace />;
   }
+  
+  // User is authenticated, show the protected content
   return <>{children}</>;
 };
 
@@ -36,8 +45,11 @@ const App = () => {
         <TitlesProvider>
           <BrowserRouter>
             <Routes>
-              {/* Dashboard na rota principal - Only accessible when logged in */}
-              <Route path="/" element={
+              {/* Root path redirects based on auth state */}
+              <Route path="/" element={<Index />} />
+              
+              {/* Dashboard - Only accessible when logged in */}
+              <Route path="/home" element={
                 <ProtectedRoute>
                   <>
                     <Navbar onSearch={setSearchQuery} />
@@ -46,7 +58,7 @@ const App = () => {
                 </ProtectedRoute>
               } />
               
-              {/* Splash screen como rota de apresentação */}
+              {/* Splash screen as presentation route */}
               <Route path="/apresentacao" element={
                 <PublicOnlyRoute>
                   <SplashScreen />
@@ -88,8 +100,12 @@ const App = () => {
               />
               <Route path="/login" element={<Auth />} />
               
-              {/* Root path needs to check auth status and redirect */}
-              <Route path="*" element={<NotFound />} />
+              {/* Catch all unknown routes and ensure they redirect to login if unauthenticated */}
+              <Route path="*" element={
+                <ProtectedRoute>
+                  <NotFound />
+                </ProtectedRoute>
+              } />
             </Routes>
             <Sonner />
             <Toaster />
