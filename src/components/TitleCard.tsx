@@ -80,8 +80,9 @@ const TitleCard: React.FC<TitleCardProps> = ({
       </div>
       <div className="p-4">
         <h3 className="font-semibold leading-tight truncate 
-          text-base 
-          sm:text-lg 
+          text-xs 
+          xs:text-sm 
+          sm:text-base 
           md:text-lg 
           lg:text-xl"
         >
