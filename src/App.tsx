@@ -11,7 +11,7 @@ import Auth from "./pages/Auth";
 import TrashPage from "./pages/Trash";
 import NotFound from "./pages/NotFound";
 import SplashScreen from "./pages/SplashScreen";
-import AdminCategories from "./pages/AdminCategories";
+import AdminDashboard from "./pages/admin/Dashboard";
 import Navbar from "./components/Navbar";
 import { TitlesProvider } from "./contexts/TitlesContext";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -20,35 +20,22 @@ import PublicOnlyRoute from "./components/PublicOnlyRoute";
 import AdminRoute from "./components/AdminRoute";
 import { useAuth } from "./contexts/AuthContext";
 import Index from "./pages/Index";
-import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
 
-// Improved ProtectedRoute component with better loading and auth state handling
-const ProtectedRoute = ({ children, adminRedirect = false }: { children: React.ReactNode, adminRedirect?: boolean }) => {
+// Improved component for protected routes
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
-  // Show loading indicator while auth state is being determined
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
+  // If still loading auth state, show nothing to prevent flash
+  if (loading) return null;
   
-  // If no user is logged in, redirect to the presentation page
+  // If no user is logged in, redirect to presentation page
   if (!user) {
     return <Navigate to="/apresentacao" replace />;
   }
   
-  // If user is admin and this route should redirect admins, send to admin categories
-  const isAdmin = user.email?.endsWith('@admin.com');
-  if (isAdmin && adminRedirect) {
-    return <Navigate to="/admin/categorias" replace />;
-  }
-  
-  // User is authenticated and not an admin (or admin on allowed route), render the protected content
+  // User is authenticated, show the protected content
   return <>{children}</>;
 };
 
@@ -62,26 +49,12 @@ const App = () => {
           <TitlesProvider>
             <BrowserRouter>
               <Routes>
-                {/* Simple redirect route that checks auth state */}
+                {/* Root path redirects based on auth state */}
                 <Route path="/" element={<Index />} />
                 
-                {/* Presentation page - only accessible when not logged in */}
-                <Route path="/apresentacao" element={
-                  <PublicOnlyRoute>
-                    <SplashScreen />
-                  </PublicOnlyRoute>
-                } />
-                
-                {/* Login page - only accessible when not logged in */}
-                <Route path="/login" element={
-                  <PublicOnlyRoute>
-                    <Auth />
-                  </PublicOnlyRoute>
-                } />
-                
-                {/* Protected routes - only accessible when logged in (and NOT for admins) */}
+                {/* Dashboard - Only accessible when logged in */}
                 <Route path="/home" element={
-                  <ProtectedRoute adminRedirect={true}>
+                  <ProtectedRoute>
                     <>
                       <Navbar onSearch={setSearchQuery} />
                       <Home searchQuery={searchQuery} />
@@ -89,19 +62,24 @@ const App = () => {
                   </ProtectedRoute>
                 } />
                 
-                <Route path="/admin/categorias" element={
+                {/* Admin Dashboard - Only accessible for admin users */}
+                <Route path="/admin" element={
                   <AdminRoute>
-                    <>
-                      <Navbar onSearch={setSearchQuery} />
-                      <AdminCategories />
-                    </>
+                    <AdminDashboard />
                   </AdminRoute>
+                } />
+                
+                {/* Splash screen as presentation route */}
+                <Route path="/apresentacao" element={
+                  <PublicOnlyRoute>
+                    <SplashScreen />
+                  </PublicOnlyRoute>
                 } />
                 
                 <Route
                   path="/adicionar"
                   element={
-                    <ProtectedRoute adminRedirect={true}>
+                    <ProtectedRoute>
                       <>
                         <Navbar onSearch={setSearchQuery} />
                         <TitleForm />
@@ -109,11 +87,10 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 />
-                
                 <Route
                   path="/editar/:id"
                   element={
-                    <ProtectedRoute adminRedirect={true}>
+                    <ProtectedRoute>
                       <>
                         <Navbar onSearch={setSearchQuery} />
                         <TitleForm />
@@ -121,11 +98,10 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 />
-                
                 <Route
                   path="/lixeira"
                   element={
-                    <ProtectedRoute adminRedirect={true}>
+                    <ProtectedRoute>
                       <>
                         <Navbar onSearch={setSearchQuery} />
                         <TrashPage />
@@ -133,9 +109,14 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 />
+                <Route path="/login" element={<Auth />} />
                 
-                {/* Catch all unknown routes */}
-                <Route path="*" element={<NotFound />} />
+                {/* Catch all unknown routes and ensure they redirect to login if unauthenticated */}
+                <Route path="*" element={
+                  <ProtectedRoute>
+                    <NotFound />
+                  </ProtectedRoute>
+                } />
               </Routes>
               <Sonner />
               <Toaster />

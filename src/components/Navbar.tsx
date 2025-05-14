@@ -1,190 +1,169 @@
-
-import { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Search, Home, Plus, Menu, X, LogOut, FolderIcon } from "lucide-react";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Search, Menu, User, Plus, Trash, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import ThemeToggle from "@/components/ThemeToggle";
+import { SheetTrigger, SheetContent, Sheet } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { toast } from "sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import ThemeToggle from "./ThemeToggle";
 import Logo from "./Logo";
-import { Trash2 } from "lucide-react";
-
-const Navbar = ({
-  onSearch
-}: {
+interface NavbarProps {
   onSearch: (query: string) => void;
+}
+const Navbar: React.FC<NavbarProps> = ({
+  onSearch
 }) => {
-  const [search, setSearch] = useState("");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const {
+    user,
+    signOut,
+    isAdmin
+  } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  const isMobile = useIsMobile();
-  
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSearch(searchQuery);
   };
-  
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      navigate("/apresentacao");
-    } catch (error: any) {
-      toast.error(error.message || "Erro ao fazer logout");
-    }
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/login");
+  };
+  const getUserInitials = () => {
+    if (!user || !user.email) return "U";
+    return user.email.charAt(0).toUpperCase();
   };
 
-  // Check if the current user is an admin (email ends with @admin.com)
-  const isAdmin = user && user.email?.endsWith('@admin.com');
-  
-  // Hide search bar on admin pages
-  const showSearchBar = isAdmin ? false : true;
-  
-  return (
-    <nav className="sticky top-0 z-10 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-      <div className="flex h-16 items-center px-4 container mx-auto">
-        <div className="flex items-center gap-2">
-          <Logo />
+  // Extrai o nome de usuário do email (parte antes do @)
+  const getUserName = () => {
+    if (!user || !user.email) return "Usuário";
+    return user.email.split('@')[0];
+  };
+  return <nav className="border-b sticky top-0 bg-background z-50">
+      <div className="container mx-auto px-2 flex items-center justify-between">
+        <div className="flex items-center w-full justify-between">
+          <Link to="/" className="font-bold text-xl py-4 flex items-center">
+            <Logo />
+          </Link>
+          {/* Mobile menu button */}
+          <Button variant="ghost" size="icon" className="md:hidden ml-2" onClick={toggleMenu}>
+            <Menu />
+          </Button>
         </div>
 
-        <div className="flex items-center ml-auto gap-2">
-          {/* Display search on large screens - only for non-admin users */}
-          {showSearchBar && !isMobile && (
-            <div className="relative hidden md:block w-96">
+        {/* Desktop navigation - combinando barra de pesquisa e botões em uma única div */}
+        <div className="hidden md:flex items-center justify-end flex-1 gap-4">
+
+          <form onSubmit={handleSearch} className="flex max-w-xl">
+            <div className="relative w-full">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input 
-                type="search" 
-                placeholder="Buscar..." 
-                onChange={e => {
-                  onSearch(e.target.value);
-                  setSearch(e.target.value);
-                }} 
-                className="w-full pl-8 bg-secondary/50" 
-              />
+              <Input type="search" placeholder="Buscar..." className="w-full pl-8" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
             </div>
-          )}
-
-          {isMobile ? (
-            <>
-              {/* Mobile Menu Toggle */}
-              <Button variant="ghost" size="icon" onClick={toggleMobileMenu} aria-label="Menu">
-                {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </form>
+          
+          {isAdmin && <Button variant="outline" size="sm" asChild>
+              <Link to="/admin">
+                <Settings className="h-4 w-4 mr-2" />
+                Admin
+              </Link>
+            </Button>}
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/adicionar">
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar
+            </Link>
+          </Button>
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/lixeira">
+              <Trash className="h-4 w-4 mr-2" />
+              Lixeira
+            </Link>
+          </Button>
+          <ThemeToggle />
+                            <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <Avatar>
+                  <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                </Avatar>
               </Button>
-
-              {/* Mobile Menu */}
-              {mobileMenuOpen && (
-                <div className="absolute top-16 right-0 w-full bg-background border-b shadow-lg z-10">
-                  <div className="flex flex-col p-4 gap-2">
-                    {/* Search bar - only for non-admin users */}
-                    {showSearchBar && (
-                      <div className="relative w-full mb-4">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input 
-                          type="search" 
-                          placeholder="Buscar..." 
-                          onChange={e => {
-                            onSearch(e.target.value);
-                            setSearch(e.target.value);
-                          }} 
-                          className="w-full pl-8 bg-secondary/50" 
-                        />
-                      </div>
-                    )}
-                    
-                    {/* Regular user navigation */}
-                    {!isAdmin && (
-                      <>
-                        <Button asChild variant="ghost" className="justify-start">
-                          <Link to="/home">
-                            <Home className="mr-2 h-4 w-4" />
-                            Início
-                          </Link>
-                        </Button>
-                        
-                        <Button asChild variant="ghost" className="justify-start">
-                          <Link to="/adicionar">
-                            <Plus className="mr-2 h-4 w-4" />
-                            Adicionar
-                          </Link>
-                        </Button>
-                        
-                        <Button asChild variant="ghost" className="justify-start">
-                          <Link to="/lixeira">
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Lixeira
-                          </Link>
-                        </Button>
-                      </>
-                    )}
-
-                    {/* Admin navigation */}
-                    {isAdmin && (
-                      <Button asChild variant="ghost" className="justify-start">
-                        <Link to="/admin/categorias">
-                          <FolderIcon className="mr-2 h-4 w-4" />
-                          Gerenciar Categorias
+            </SheetTrigger>
+            <SheetContent className="w-[250px] sm:w-[300px]">
+              <div className="flex flex-col h-full">
+                <div className="flex-1">
+                  <div className="py-4 flex items-center">
+                    <Avatar className="h-12 w-12">
+                      <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                    </Avatar>
+                    <div className="ml-4">
+                      <h2 className="font-medium">{getUserName()}</h2>
+                      <p className="text-sm text-muted-foreground">{isAdmin ? 'Administrador' : 'Usuário'}</p>
+                    </div>
+                  </div>
+                  
+                  {isAdmin && <div className="py-2">
+                      <Button variant="outline" className="w-full justify-start" asChild>
+                        <Link to="/admin">
+                          <Settings className="h-4 w-4 mr-2" />
+                          Painel de Administração
                         </Link>
                       </Button>
-                    )}
-                    
-                    <ThemeToggle />
-                    
-                    <Button variant="ghost" className="justify-start" onClick={handleLogout}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Sair
-                    </Button>
-                  </div>
+                    </div>}
                 </div>
-              )}
-            </>
-          ) : (
-            <>
-              {/* Desktop Navigation */}
-              {/* Regular user navigation */}
-              {!isAdmin && (
-                <>
-                  <Button asChild variant="ghost" size="icon">
-                    <Link to="/home" aria-label="Início">
-                      <Home className="h-5 w-5" />
-                    </Link>
-                  </Button>
-                  
-                  <Button asChild variant="ghost" size="icon">
-                    <Link to="/adicionar" aria-label="Adicionar">
-                      <Plus className="h-5 w-5" />
-                    </Link>
-                  </Button>
-                  
-                  <Button asChild variant="ghost" size="icon">
-                    <Link to="/lixeira" aria-label="Lixeira">
-                      <Trash2 className="h-5 w-5" />
-                    </Link>
-                  </Button>
-                </>
-              )}
-
-              {/* Admin navigation */}
-              {isAdmin && (
-                <Button asChild variant="ghost" size="icon">
-                  <Link to="/admin/categorias" aria-label="Gerenciar Categorias">
-                    <FolderIcon className="h-5 w-5" />
-                  </Link>
+                
+                <Button variant="outline" className="mt-auto" onClick={handleSignOut}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sair
                 </Button>
-              )}
-              
-              <ThemeToggle />
-              
-              <Button variant="ghost" size="icon" onClick={handleLogout} aria-label="Sair">
-                <LogOut className="h-5 w-5" />
-              </Button>
-            </>
-          )}
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
-    </nav>
-  );
-};
 
+      {/* Mobile menu - only visible when menu is open */}
+      {isMenuOpen && <div className="md:hidden p-4 border-t">
+          <form onSubmit={handleSearch} className="mb-4">
+            <div className="relative w-full">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input type="search" placeholder="Buscar..." className="w-full pl-8" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+            </div>
+          </form>
+          
+          <div className="space-y-2">
+            {isAdmin && <Button variant="outline" className="w-full justify-start" asChild>
+                <Link to="/admin" onClick={toggleMenu}>
+                  <Settings className="h-4 w-4 mr-2" />
+                  Admin
+                </Link>
+              </Button>}
+            <Button variant="outline" className="w-full justify-start" asChild>
+              <Link to="/adicionar" onClick={toggleMenu}>
+                <Plus className="h-4 w-4 mr-2" />
+                Adicionar
+              </Link>
+            </Button>
+            <Button variant="outline" className="w-full justify-start" asChild>
+              <Link to="/lixeira" onClick={toggleMenu}>
+                <Trash className="h-4 w-4 mr-2" />
+                Lixeira
+              </Link>
+            </Button>
+            <div className="flex items-center justify-between pt-2">
+              <Button variant="outline" onClick={handleSignOut} className="flex-1">
+                <LogOut className="h-4 w-4 mr-2" />
+                Sair
+              </Button>
+              <div className="ml-2">
+                <ThemeToggle />
+              </div>
+            </div>
+          </div>
+        </div>}
+    </nav>;
+};
 export default Navbar;
