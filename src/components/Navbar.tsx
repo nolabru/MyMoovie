@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { LogOut, Shield, Search, Menu, User } from "lucide-react";
+import { LogOut, Shield, Search, Menu, User, Plus, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Logo from "./Logo";
@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import ThemeToggle from "./ThemeToggle";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface NavbarProps {
   onSearch: (query: string) => void;
@@ -36,6 +37,19 @@ const Navbar: React.FC<NavbarProps> = ({
   const getUserInitials = () => {
     if (!user || !user.email) return "U";
     return user.email.charAt(0).toUpperCase();
+  };
+
+  const handleAddTitle = () => {
+    if (!user) {
+      toast.error("Você precisa estar logado para adicionar títulos");
+      navigate("/login");
+      return;
+    }
+    navigate("/adicionar");
+  };
+
+  const handleTrashClick = () => {
+    navigate("/lixeira");
   };
 
   // For admin panel, we use a simplified navbar
@@ -74,7 +88,7 @@ const Navbar: React.FC<NavbarProps> = ({
     <nav className="border-b sticky top-0 bg-background z-50">
       <div className="container mx-auto px-2 flex items-center justify-between">
         <div className="flex items-center">
-          <Link to="/home" className="mr-6">
+          <Link to="/" className="mr-6">
             <Logo />
           </Link>
         </div>
@@ -92,6 +106,21 @@ const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         <div className="flex items-center gap-4">
+          {/* Botões de lixeira e adicionar título - apenas para usuários comuns autenticados */}
+          {user && !isAdmin && (
+            <div className="hidden md:flex gap-2">
+              <Button variant="outline" onClick={handleTrashClick} size="sm">
+                <Trash className="h-4 w-4 mr-1" />
+                Lixeira
+              </Button>
+              
+              <Button onClick={handleAddTitle} size="sm">
+                <Plus className="h-4 w-4 mr-1" />
+                Adicionar
+              </Button>
+            </div>
+          )}
+
           <ThemeToggle />
           
           <div className="flex items-center space-x-2">
@@ -150,6 +179,18 @@ const Navbar: React.FC<NavbarProps> = ({
             <Button variant="ghost" className="justify-start" asChild>
               <Link to="/">Início</Link>
             </Button>
+            {user && !isAdmin && (
+              <>
+                <Button variant="ghost" className="justify-start" onClick={handleTrashClick}>
+                  <Trash className="h-4 w-4 mr-2" />
+                  Lixeira
+                </Button>
+                <Button variant="ghost" className="justify-start" onClick={handleAddTitle}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Título
+                </Button>
+              </>
+            )}
             {user ? <>
                 {isAdmin && (
                   <Button variant="ghost" className="justify-start" asChild>

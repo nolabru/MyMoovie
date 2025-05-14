@@ -7,8 +7,6 @@ import { TitleType, CategoryType } from "@/components/TitleCard";
 import { useTitles } from "@/contexts/TitlesContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Plus, User, Trash } from "lucide-react";
 
 type SortOption = "name_asc" | "name_desc" | "rating_asc" | "rating_desc" | null;
 
@@ -70,40 +68,12 @@ const Home: React.FC<{
     toast.success("Título movido para a lixeira");
   };
 
-  const handleAddTitle = () => {
-    if (!user) {
-      toast.error("Você precisa estar logado para adicionar títulos");
-      navigate("/login");
-      return;
-    }
-    navigate("/adicionar");
-  };
-
-  const handleTrashClick = () => {
-    navigate("/lixeira");
-  };
-
-  const loading = authLoading || titlesLoading;
+  const isLoading = authLoading || titlesLoading;
 
   return <div className="container mx-auto py-6 px-4">
-      {/* Mostrar botões apenas para usuários não-administradores */}
-      {user && !isAdmin && (
-        <div className="flex justify-between items-center mb-6">
-          <Button variant="outline" onClick={handleTrashClick}>
-            <Trash className="h-4 w-4 mr-1" />
-            Lixeira
-          </Button>
-          
-          <Button onClick={handleAddTitle}>
-            <Plus className="h-4 w-4 mr-1" />
-            Adicionar Título
-          </Button>
-        </div>
-      )}
-
       <Filters typeFilter={typeFilter} setTypeFilter={setTypeFilter} categoryFilter={categoryFilter} setCategoryFilter={setCategoryFilter} sortOption={sortOption} setSortOption={setSortOption} />
 
-      {loading ? <div className="text-center py-10">
+      {isLoading ? <div className="text-center py-10">
           <p className="text-muted-foreground">Carregando...</p>
         </div> : !user ? <div className="text-center py-10 mt-20">
           <h3 className="text-xl font-medium text-muted-foreground mb-4">
@@ -112,10 +82,6 @@ const Home: React.FC<{
           <p className="text-muted-foreground mb-6">
             Você precisa estar logado para gerenciar seus filmes, séries e novelas.
           </p>
-          <Button onClick={() => navigate("/login")}>
-            <User className="h-4 w-4 mr-1" />
-            Fazer Login
-          </Button>
         </div> : activeTitles.length === 0 ? <div className="text-center py-10">
           <h3 className="text-xl font-medium text-muted-foreground mb-4">
             Nenhum título encontrado
