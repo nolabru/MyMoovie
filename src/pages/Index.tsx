@@ -1,29 +1,20 @@
 
-import React, { useEffect } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import React from "react";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const { user, loading } = useAuth();
-  const navigate = useNavigate();
   
-  // Use useEffect to prevent render loops
-  useEffect(() => {
-    if (!loading) {
-      if (user) {
-        navigate("/home", { replace: true });
-      } else {
-        navigate("/apresentacao", { replace: true });
-      }
-    }
-  }, [user, loading, navigate]);
+  // If loading, return null to prevent premature redirects
+  if (loading) return null;
   
-  // While loading or during navigation, show loading indicator
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
-    </div>
-  );
+  // If user is logged in, go to dashboard, otherwise to presentation
+  if (user) {
+    return <Navigate to="/home" replace />;
+  } else {
+    return <Navigate to="/apresentacao" replace />;
+  }
 };
 
 export default Index;
