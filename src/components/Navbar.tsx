@@ -44,7 +44,7 @@ const Navbar: React.FC<NavbarProps> = ({
     return user.email.split('@')[0];
   };
   return <nav className="border-b sticky top-0 bg-background z-50">
-      <div className="container mx-auto px-2 flex items-center justify-between w-full">
+      <div className="container mx-auto px-2 flex items-center justify-between">
         <div className="flex items-center">
           <Link to="/" className="font-bold text-xl py-4 flex items-center">
             <Logo />
@@ -55,15 +55,16 @@ const Navbar: React.FC<NavbarProps> = ({
           </Button>
         </div>
 
-        {/* Desktop navigation - Reorganized to put profile button before search */}
+        {/* Search form - hidden on mobile */}
+        <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-4">
+          <div className="relative w-full">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input type="search" placeholder="Buscar..." className="w-full pl-8" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+          </div>
+        </form>
+
+        {/* Desktop navigation */}
         <div className="hidden md:flex items-center gap-4">
-           {/* Search form - now after profile button with increased width */}
-          <form onSubmit={handleSearch} className="flex flex-1 max-w-xl">
-            <div className="relative w-full">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input type="search" placeholder="Buscar..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-80 pl-8\n" />
-            </div>
-          </form>
           {isAdmin && <Button variant="outline" size="sm" asChild>
               <Link to="/admin">
                 <Settings className="h-4 w-4 mr-2" />
@@ -83,9 +84,6 @@ const Navbar: React.FC<NavbarProps> = ({
             </Link>
           </Button>
           <ThemeToggle />
-          
-          {/* Profile button - now before search */}
-             
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">
@@ -124,7 +122,6 @@ const Navbar: React.FC<NavbarProps> = ({
               </div>
             </SheetContent>
           </Sheet>
-       
         </div>
       </div>
 
