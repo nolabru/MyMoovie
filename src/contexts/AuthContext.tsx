@@ -9,7 +9,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   isAdmin: boolean;
-  adminLoading: boolean;  // Adicionando propriedade na interface
+  adminLoading: boolean;
   checkAdminStatus: () => Promise<boolean>;
   signUp: (email: string, password: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
