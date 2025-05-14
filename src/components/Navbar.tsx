@@ -61,7 +61,7 @@ const Navbar: React.FC<NavbarProps> = ({
           <form onSubmit={handleSearch} className="flex flex-1 max-w-xl">
             <div className="relative w-full">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input type="search" placeholder="Buscar..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-80 pl-10" />
+              <Input type="search" placeholder="Buscar..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-80 pl-8\n" />
             </div>
           </form>
           {isAdmin && <Button variant="outline" size="sm" asChild>
