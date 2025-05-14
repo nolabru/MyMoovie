@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Home, Plus, Menu, X, LogOut, FolderIcon } from "lucide-react";
@@ -9,6 +10,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
 import Logo from "./Logo";
 import { Trash2 } from "lucide-react";
+
 const Navbar = ({
   onSearch
 }: {
@@ -36,21 +38,26 @@ const Navbar = ({
 
   // Check if the current user is an admin (email ends with @admin.com)
   const isAdmin = user && user.email?.endsWith('@admin.com');
+  
   return <nav className="sticky top-0 z-10 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
       <div className="flex h-16 items-center px-4 container mx-auto">
         <div className="flex items-center gap-2">
           <Logo />
-          
         </div>
 
         <div className="flex items-center ml-auto gap-2">
           {/* Display search on large screens */}
           <div className="relative hidden md:block w-96">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input type="search" placeholder="Buscar..." onChange={e => {
-            onSearch(e.target.value);
-            setSearch(e.target.value);
-          }} className="w-full pl-8 bg-muted" />
+            <Input 
+              type="search" 
+              placeholder="Buscar..." 
+              onChange={e => {
+                onSearch(e.target.value);
+                setSearch(e.target.value);
+              }} 
+              className="w-full pl-8 bg-secondary/50" 
+            />
           </div>
 
           {isMobile ? <>
@@ -64,10 +71,15 @@ const Navbar = ({
                   <div className="flex flex-col p-4 gap-2">
                     <div className="relative w-full mb-4">
                       <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input type="search" placeholder="Buscar..." onChange={e => {
-                  onSearch(e.target.value);
-                  setSearch(e.target.value);
-                }} className="w-full pl-8 bg-muted" />
+                      <Input 
+                        type="search" 
+                        placeholder="Buscar..." 
+                        onChange={e => {
+                          onSearch(e.target.value);
+                          setSearch(e.target.value);
+                        }} 
+                        className="w-full pl-8 bg-secondary/50" 
+                      />
                     </div>
                     
                     <Button asChild variant="ghost" className="justify-start">
@@ -144,4 +156,5 @@ const Navbar = ({
       </div>
     </nav>;
 };
+
 export default Navbar;
