@@ -50,7 +50,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Primeiro configuramos o listener de mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_, newSession) => {
+      (event, newSession) => {
+        console.log('Auth state change:', event, newSession?.user?.email);
         setSession(newSession);
         if (newSession?.user) {
           setUser(newSession.user);
@@ -67,6 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Depois verificamos a sessão atual
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      console.log('Current session:', currentSession?.user?.email);
       setSession(currentSession);
       
       if (currentSession?.user) {
@@ -113,13 +115,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Função para logout
+  // Função para logout - Melhorada para lidar com sessões expiradas
   const signOut = async () => {
     try {
+      // Mesmo se não houver sessão ativa, tentamos fazer logout para limpar qualquer estado
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      
+      // Se houver erro mas for relacionado a sessão não encontrada, consideramos como sucesso
+      if (error && !error.message.includes("Session not found")) {
+        throw error;
+      }
+      
+      // Limpar estados locais independentemente do resultado do signOut
+      setUser(null);
+      setSession(null);
+      setIsAdmin(false);
+      
       toast.success("Logout realizado com sucesso!");
     } catch (error: any) {
+      console.error("Erro durante logout:", error);
       toast.error(error.message || "Erro ao fazer logout");
       throw error;
     }
