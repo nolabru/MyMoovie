@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Menu, User, Plus, Trash, LogOut, Settings } from "lucide-react";
+import { Search, Menu, Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SheetTrigger, SheetContent, Sheet } from "@/components/ui/sheet";
@@ -51,10 +51,17 @@ const Navbar: React.FC<NavbarProps> = ({
     return user.email.split('@')[0];
   };
 
+  // Se for admin, redirecionar para o painel admin
+  const handleAdminClick = () => {
+    if (isAdmin) {
+      navigate("/admin");
+    }
+  };
+
   return <nav className="border-b sticky top-0 bg-background z-50">
       <div className="container mx-auto px-2 flex items-center justify-between">
         <div className="flex items-center">
-          <Link to="/" className="font-bold text-xl py-4 flex items-center">
+          <Link to={isAdmin ? "/admin" : "/"} className="font-bold text-xl py-4 flex items-center">
             <Logo />
           </Link>
           {/* Mobile menu button */}
@@ -65,34 +72,40 @@ const Navbar: React.FC<NavbarProps> = ({
 
         {/* Desktop navigation - combinando barra de pesquisa e botões em uma única div */}
         <div className="hidden md:flex items-center justify-end flex-1 gap-4">
+          {!isAdmin && (
+            <>
+              <form onSubmit={handleSearch} className="flex max-w-xl">
+                <div className="relative w-full">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input type="search" placeholder="Buscar..." className="w-full pl-8" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+                </div>
+              </form>
+              
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/adicionar">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Adicionar
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/lixeira">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Lixeira
+                </Link>
+              </Button>
+            </>
+          )}
 
-          <form onSubmit={handleSearch} className="flex max-w-xl">
-            <div className="relative w-full">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input type="search" placeholder="Buscar..." className="w-full pl-8" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-            </div>
-          </form>
+          {isAdmin && (
+            <Button variant="outline" size="sm" onClick={handleAdminClick}>
+              <Settings className="h-4 w-4 mr-2" />
+              Dashboard Admin
+            </Button>
+          )}
           
-          {isAdmin && <Button variant="outline" size="sm" asChild>
-              <Link to="/admin">
-                <Settings className="h-4 w-4 mr-2" />
-                Admin
-              </Link>
-            </Button>}
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/adicionar">
-              <Plus className="h-4 w-4 mr-2" />
-              Adicionar
-            </Link>
-          </Button>
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/lixeira">
-              <Trash className="h-4 w-4 mr-2" />
-              Lixeira
-            </Link>
-          </Button>
           <ThemeToggle />
-                            <Sheet>
+          
+          <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">
                 <Avatar>
@@ -135,40 +148,50 @@ const Navbar: React.FC<NavbarProps> = ({
 
       {/* Mobile menu - only visible when menu is open */}
       {isMenuOpen && <div className="md:hidden p-4 border-t">
-          <form onSubmit={handleSearch} className="mb-4">
-            <div className="relative w-full">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input type="search" placeholder="Buscar..." className="w-full pl-8" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-            </div>
-          </form>
-          
-          <div className="space-y-2">
-            {isAdmin && <Button variant="outline" className="w-full justify-start" asChild>
+          {!isAdmin && (
+            <>
+              <form onSubmit={handleSearch} className="mb-4">
+                <div className="relative w-full">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input type="search" placeholder="Buscar..." className="w-full pl-8" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+                </div>
+              </form>
+              
+              <div className="space-y-2">
+                <Button variant="outline" className="w-full justify-start" asChild>
+                  <Link to="/adicionar" onClick={toggleMenu}>
+                    <Settings className="h-4 w-4 mr-2" />
+                    Adicionar
+                  </Link>
+                </Button>
+                <Button variant="outline" className="w-full justify-start" asChild>
+                  <Link to="/lixeira" onClick={toggleMenu}>
+                    <Settings className="h-4 w-4 mr-2" />
+                    Lixeira
+                  </Link>
+                </Button>
+              </div>
+            </>
+          )}
+
+          {isAdmin && (
+            <div className="space-y-2">
+              <Button variant="outline" className="w-full justify-start" asChild>
                 <Link to="/admin" onClick={toggleMenu}>
                   <Settings className="h-4 w-4 mr-2" />
-                  Admin
+                  Dashboard Admin
                 </Link>
-              </Button>}
-            <Button variant="outline" className="w-full justify-start" asChild>
-              <Link to="/adicionar" onClick={toggleMenu}>
-                <Plus className="h-4 w-4 mr-2" />
-                Adicionar
-              </Link>
-            </Button>
-            <Button variant="outline" className="w-full justify-start" asChild>
-              <Link to="/lixeira" onClick={toggleMenu}>
-                <Trash className="h-4 w-4 mr-2" />
-                Lixeira
-              </Link>
-            </Button>
-            <div className="flex items-center justify-between pt-2">
-              <Button variant="outline" onClick={handleSignOut} className="flex-1">
-                <LogOut className="h-4 w-4 mr-2" />
-                Sair
               </Button>
-              <div className="ml-2">
-                <ThemeToggle />
-              </div>
+            </div>
+          )}
+          
+          <div className="flex items-center justify-between pt-2">
+            <Button variant="outline" onClick={handleSignOut} className="flex-1">
+              <LogOut className="h-4 w-4 mr-2" />
+              Sair
+            </Button>
+            <div className="ml-2">
+              <ThemeToggle />
             </div>
           </div>
         </div>}

@@ -17,7 +17,7 @@ const AdminDashboard = () => {
       <div className="flex-1 p-6">
         <h1 className="text-3xl font-bold mb-6">Dashboard Administrativo</h1>
         <p className="text-muted-foreground mb-8">
-          Bem-vindo, {user?.email}! Gerencie seu catálogo aqui.
+          Bem-vindo, {user?.email}! Gerencie o catálogo aqui.
         </p>
 
         <Tabs defaultValue="stats" className="w-full">
