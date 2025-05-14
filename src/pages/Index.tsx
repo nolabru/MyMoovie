@@ -15,7 +15,7 @@ import Navbar from "@/components/Navbar";
 type SortOption = "name_asc" | "name_desc" | "rating_asc" | "rating_desc" | null;
 
 const Index = () => {
-  const { user, loading, isAdmin, adminLoading } = useAuth();
+  const { user, loading: authLoading, isAdmin, adminLoading } = useAuth();
   const [isReady, setIsReady] = useState(false);
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
@@ -30,13 +30,13 @@ const Index = () => {
 
   // Aguardamos a conclusão da verificação de admin antes de redirecionar
   useEffect(() => {
-    if (!loading && !adminLoading) {
+    if (!authLoading && !adminLoading) {
       setIsReady(true);
     }
-  }, [loading, adminLoading]);
+  }, [authLoading, adminLoading]);
   
   // Mostrar nada enquanto carrega para evitar redirecionamentos prematuros
-  if (loading || adminLoading || !isReady) {
+  if (authLoading || adminLoading || !isReady) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-pulse text-lg">Carregando...</div>
@@ -105,7 +105,7 @@ const Index = () => {
     navigate("/lixeira");
   };
 
-  const loading = authLoading || titlesLoading;
+  const isLoading = authLoading || titlesLoading;
 
   // Usuário autenticado e não é admin, mostrar página principal
   return (
@@ -135,7 +135,7 @@ const Index = () => {
           setSortOption={setSortOption}
         />
 
-        {loading ? (
+        {isLoading ? (
           <div className="text-center py-10">
             <p className="text-muted-foreground">Carregando...</p>
           </div>
