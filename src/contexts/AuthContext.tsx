@@ -8,6 +8,7 @@ interface AuthContextType {
   session: Session | null;
   user: User | null;
   loading: boolean;
+  isAdmin: boolean;
   signUp: (email: string, password: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -19,12 +20,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     // Verificar sessão atual
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        checkIsAdmin(session.user.id);
+      }
+      
       setLoading(false);
     });
 
@@ -33,11 +40,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       (_, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          checkIsAdmin(session.user.id);
+        } else {
+          setIsAdmin(false);
+        }
       }
     );
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Verificar se o usuário é administrador
+  const checkIsAdmin = async (userId: string) => {
+    if (!userId) return;
+    
+    try {
+      const email = user?.email || '';
+      if (email.endsWith('@admin.com')) {
+        setIsAdmin(true);
+        return;
+      }
+      
+      // Verificar na tabela user_roles se o usuário tem a role de admin
+      const { data, error } = await supabase
+        .rpc('is_admin', { user_id: userId });
+        
+      if (error) throw error;
+      setIsAdmin(!!data);
+    } catch (error) {
+      console.error('Erro ao verificar função de administrador:', error);
+      setIsAdmin(false);
+    }
+  };
 
   // Função para cadastro de usuários
   const signUp = async (email: string, password: string) => {
@@ -89,6 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         session,
         user,
         loading,
+        isAdmin,
         signUp,
         signIn,
         signOut,

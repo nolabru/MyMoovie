@@ -11,11 +11,13 @@ import Auth from "./pages/Auth";
 import TrashPage from "./pages/Trash";
 import NotFound from "./pages/NotFound";
 import SplashScreen from "./pages/SplashScreen";
+import AdminDashboard from "./pages/admin/Dashboard";
 import Navbar from "./components/Navbar";
 import { TitlesProvider } from "./contexts/TitlesContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import PublicOnlyRoute from "./components/PublicOnlyRoute";
+import AdminRoute from "./components/AdminRoute";
 import { useAuth } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 
@@ -58,6 +60,13 @@ const App = () => {
                       <Home searchQuery={searchQuery} />
                     </>
                   </ProtectedRoute>
+                } />
+                
+                {/* Admin Dashboard - Only accessible for admin users */}
+                <Route path="/admin" element={
+                  <AdminRoute>
+                    <AdminDashboard />
+                  </AdminRoute>
                 } />
                 
                 {/* Splash screen as presentation route */}
