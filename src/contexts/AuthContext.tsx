@@ -8,6 +8,8 @@ interface AuthContextType {
   session: Session | null;
   user: User | null;
   loading: boolean;
+  isAdmin: boolean;
+  checkAdminStatus: () => Promise<boolean>;
   signUp: (email: string, password: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -19,6 +21,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+
+  // Função para verificar se o usuário é administrador
+  const checkAdminStatus = async (): Promise<boolean> => {
+    if (!user) return false;
+
+    try {
+      const { data, error } = await supabase.rpc('is_admin', { user_id: user.id });
+      
+      if (error) {
+        throw error;
+      }
+      
+      setIsAdmin(!!data);
+      return !!data;
+    } catch (error: any) {
+      console.error("Erro ao verificar status de admin:", error.message);
+      return false;
+    }
+  };
 
   useEffect(() => {
     // Verificar sessão atual
@@ -26,6 +48,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // Se o usuário estiver logado, verifica se é admin
+      if (session?.user) {
+        checkAdminStatus();
+      }
     });
 
     // Configurar listener para mudanças de autenticação
@@ -33,6 +60,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       (_, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        
+        // Se o usuário estiver logado, verifica se é admin
+        if (session?.user) {
+          setTimeout(() => {
+            checkAdminStatus();
+          }, 0);
+        } else {
+          setIsAdmin(false);
+        }
       }
     );
 
@@ -89,6 +125,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         session,
         user,
         loading,
+        isAdmin,
+        checkAdminStatus,
         signUp,
         signIn,
         signOut,

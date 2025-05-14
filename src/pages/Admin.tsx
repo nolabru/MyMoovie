@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import CategoryForm from "@/components/admin/CategoryForm";
@@ -12,52 +11,40 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Shield } from "lucide-react";
 
 const Admin: React.FC = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin, checkAdminStatus } = useAuth();
   const navigate = useNavigate();
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [adminLoading, setAdminLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const checkAdminStatus = async () => {
-      if (!user) return;
+    const verifyAccess = async () => {
+      if (!user) {
+        return;
+      }
 
       try {
-        const { data, error } = await supabase.rpc('is_admin', { user_id: user.id });
+        setAdminLoading(true);
+        const isUserAdmin = await checkAdminStatus();
         
-        if (error) {
-          throw error;
+        if (!isUserAdmin) {
+          toast.error("Acesso restrito a administradores");
+          navigate("/home");
         }
-        
-        setIsAdmin(data);
-      } catch (error: any) {
-        console.error("Erro ao verificar status de admin:", error.message);
-        toast.error("Erro ao verificar permissões de administrador");
+      } catch (error) {
+        console.error("Erro ao verificar permissões:", error);
+        toast.error("Erro ao verificar permissões");
+        navigate("/home");
       } finally {
         setAdminLoading(false);
       }
     };
 
     if (user) {
-      checkAdminStatus();
+      verifyAccess();
     } else if (!loading) {
       setAdminLoading(false);
-    }
-  }, [user, loading]);
-
-  // Redirecionar se não estiver autenticado
-  useEffect(() => {
-    if (!loading && !user) {
       navigate("/login");
     }
-  }, [user, loading, navigate]);
-
-  // Redirecionar se não for administrador
-  useEffect(() => {
-    if (!adminLoading && !isAdmin && user) {
-      toast.error("Acesso restrito a administradores");
-      navigate("/home");
-    }
-  }, [isAdmin, adminLoading, user, navigate]);
+  }, [user, loading, navigate, checkAdminStatus]);
 
   if (loading || adminLoading) {
     return (
