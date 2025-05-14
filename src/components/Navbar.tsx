@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Menu, User, Plus, Trash, LogOut, Settings } from "lucide-react";
@@ -8,9 +9,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ThemeToggle from "./ThemeToggle";
 import Logo from "./Logo";
+
 interface NavbarProps {
   onSearch: (query: string) => void;
 }
+
 const Navbar: React.FC<NavbarProps> = ({
   onSearch
 }) => {
@@ -22,17 +25,21 @@ const Navbar: React.FC<NavbarProps> = ({
     isAdmin
   } = useAuth();
   const navigate = useNavigate();
+  
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     onSearch(searchQuery);
   };
+  
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+  
   const handleSignOut = async () => {
     await signOut();
     navigate("/login");
   };
+  
   const getUserInitials = () => {
     if (!user || !user.email) return "U";
     return user.email.charAt(0).toUpperCase();
@@ -43,6 +50,7 @@ const Navbar: React.FC<NavbarProps> = ({
     if (!user || !user.email) return "Usuário";
     return user.email.split('@')[0];
   };
+  
   return <nav className="border-b sticky top-0 bg-background z-50">
       <div className="container mx-auto px-2 flex items-center justify-between">
         <div className="flex items-center">
@@ -55,15 +63,7 @@ const Navbar: React.FC<NavbarProps> = ({
           </Button>
         </div>
 
-        {/* Search form - hidden on mobile */}
-        <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-4">
-          <div className="relative w-full">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input type="search" placeholder="Buscar..." className="w-full pl-8" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-          </div>
-        </form>
-
-        {/* Desktop navigation */}
+        {/* Desktop navigation - Reorganized to put profile button before search */}
         <div className="hidden md:flex items-center gap-4">
           {isAdmin && <Button variant="outline" size="sm" asChild>
               <Link to="/admin">
@@ -84,6 +84,8 @@ const Navbar: React.FC<NavbarProps> = ({
             </Link>
           </Button>
           <ThemeToggle />
+          
+          {/* Profile button - now before search */}
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">
@@ -122,6 +124,14 @@ const Navbar: React.FC<NavbarProps> = ({
               </div>
             </SheetContent>
           </Sheet>
+          
+          {/* Search form - now after profile button */}
+          <form onSubmit={handleSearch} className="flex flex-1 max-w-md">
+            <div className="relative w-full">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input type="search" placeholder="Buscar..." className="w-full pl-8" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+            </div>
+          </form>
         </div>
       </div>
 
@@ -166,4 +176,5 @@ const Navbar: React.FC<NavbarProps> = ({
         </div>}
     </nav>;
 };
+
 export default Navbar;
