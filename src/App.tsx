@@ -19,6 +19,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import PublicOnlyRoute from "./components/PublicOnlyRoute";
 import AdminRoute from "./components/AdminRoute";
 import Index from "./pages/Index";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -59,40 +60,48 @@ const App = () => {
                 <Route
                   path="/home"
                   element={
-                    <>
-                      <Navbar onSearch={setSearchQuery} />
-                      <Home searchQuery={searchQuery} />
-                    </>
+                    <ProtectedRoute>
+                      <>
+                        <Navbar onSearch={setSearchQuery} />
+                        <Home searchQuery={searchQuery} />
+                      </>
+                    </ProtectedRoute>
                   }
                 />
                 
                 <Route
                   path="/adicionar"
                   element={
-                    <>
-                      <Navbar onSearch={setSearchQuery} />
-                      <TitleForm />
-                    </>
+                    <ProtectedRoute>
+                      <>
+                        <Navbar onSearch={setSearchQuery} />
+                        <TitleForm />
+                      </>
+                    </ProtectedRoute>
                   }
                 />
                 
                 <Route
                   path="/editar/:id"
                   element={
-                    <>
-                      <Navbar onSearch={setSearchQuery} />
-                      <TitleForm />
-                    </>
+                    <ProtectedRoute>
+                      <>
+                        <Navbar onSearch={setSearchQuery} />
+                        <TitleForm />
+                      </>
+                    </ProtectedRoute>
                   }
                 />
                 
                 <Route
                   path="/lixeira"
                   element={
-                    <>
-                      <Navbar onSearch={setSearchQuery} />
-                      <TrashPage />
-                    </>
+                    <ProtectedRoute>
+                      <>
+                        <Navbar onSearch={setSearchQuery} />
+                        <TrashPage />
+                      </>
+                    </ProtectedRoute>
                   }
                 />
                 
