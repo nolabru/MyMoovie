@@ -3,9 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { Search, Home, Plus, Menu, X, LogOut, FolderIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ThemeToggle } from "./ThemeToggle";
+import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
 import Logo from "./Logo";
 import { Trash2 } from "lucide-react";
@@ -15,7 +15,7 @@ const Navbar = ({ onSearch }: { onSearch: (query: string) => void }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
