@@ -23,18 +23,12 @@ import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
 
-// Improved component for protected routes with better error handling
+// Improved component for protected routes
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
-  // If still loading auth state, show a loading indicator
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+  // If still loading auth state, show nothing to prevent flash
+  if (loading) return null;
   
   // If no user is logged in, redirect to presentation page
   if (!user) {
@@ -58,7 +52,7 @@ const App = () => {
                 {/* Root path redirects based on auth state */}
                 <Route path="/" element={<Index />} />
                 
-                {/* Dashboard - Only accessible when logged in as regular user */}
+                {/* Dashboard - Only accessible when logged in */}
                 <Route path="/home" element={
                   <ProtectedRoute>
                     <>
@@ -82,37 +76,47 @@ const App = () => {
                   </PublicOnlyRoute>
                 } />
                 
-                <Route path="/adicionar" element={
-                  <ProtectedRoute>
-                    <>
-                      <Navbar onSearch={setSearchQuery} />
-                      <TitleForm />
-                    </>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/editar/:id" element={
-                  <ProtectedRoute>
-                    <>
-                      <Navbar onSearch={setSearchQuery} />
-                      <TitleForm />
-                    </>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/lixeira" element={
-                  <ProtectedRoute>
-                    <>
-                      <Navbar onSearch={setSearchQuery} />
-                      <TrashPage />
-                    </>
-                  </ProtectedRoute>
-                } />
-                
+                <Route
+                  path="/adicionar"
+                  element={
+                    <ProtectedRoute>
+                      <>
+                        <Navbar onSearch={setSearchQuery} />
+                        <TitleForm />
+                      </>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/editar/:id"
+                  element={
+                    <ProtectedRoute>
+                      <>
+                        <Navbar onSearch={setSearchQuery} />
+                        <TitleForm />
+                      </>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/lixeira"
+                  element={
+                    <ProtectedRoute>
+                      <>
+                        <Navbar onSearch={setSearchQuery} />
+                        <TrashPage />
+                      </>
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="/login" element={<Auth />} />
                 
-                {/* Catch all unknown routes */}
-                <Route path="*" element={<NotFound />} />
+                {/* Catch all unknown routes and ensure they redirect to login if unauthenticated */}
+                <Route path="*" element={
+                  <ProtectedRoute>
+                    <NotFound />
+                  </ProtectedRoute>
+                } />
               </Routes>
               <Sonner />
               <Toaster />
