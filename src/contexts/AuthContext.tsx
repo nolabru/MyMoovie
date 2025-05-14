@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
@@ -23,14 +22,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
-  const [adminLoading, setAdminLoading] = useState<boolean>(true);
+  const [adminLoading, setAdminLoading] = useState<boolean>(false);
 
   // Função para verificar se o usuário é administrador
   const checkAdminStatus = async (): Promise<boolean> => {
     if (!user) return false;
 
     try {
-      setAdminLoading(true);
       const { data, error } = await supabase.rpc('is_admin', { user_id: user.id });
       
       if (error) {
@@ -42,8 +40,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error: any) {
       console.error("Erro ao verificar status de admin:", error.message);
       return false;
-    } finally {
-      setAdminLoading(false);
     }
   };
 
@@ -57,8 +53,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Se o usuário estiver logado, verifica se é admin
       if (session?.user) {
         checkAdminStatus();
-      } else {
-        setAdminLoading(false);
       }
     });
 
@@ -75,7 +69,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }, 0);
         } else {
           setIsAdmin(false);
-          setAdminLoading(false);
         }
       }
     );
