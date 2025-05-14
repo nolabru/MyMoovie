@@ -1,13 +1,14 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Menu, User, Plus, Trash, LogOut } from "lucide-react";
+import { Search, Menu, User, Plus, Trash, LogOut, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Logo from "./Logo";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ThemeToggle from "./ThemeToggle";
+import { supabase } from "@/integrations/supabase/client";
 
 interface NavbarProps {
   onSearch: (query: string) => void;
@@ -18,11 +19,35 @@ const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const {
     user,
     signOut
   } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) return;
+
+      try {
+        const { data, error } = await supabase.rpc('is_admin', { user_id: user.id });
+        
+        if (error) {
+          throw error;
+        }
+        
+        setIsAdmin(data);
+      } catch (error: any) {
+        console.error("Erro ao verificar status de admin:", error.message);
+        setIsAdmin(false);
+      }
+    };
+
+    if (user) {
+      checkAdminStatus();
+    }
+  }, [user]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,6 +102,15 @@ const Navbar: React.FC<NavbarProps> = ({
                     Lixeira
                   </Link>
                 </Button>
+                
+                {isAdmin && (
+                  <Button variant="ghost" asChild>
+                    <Link to="/admin">
+                      <Shield className="h-4 w-4 mr-1" />
+                      Admin
+                    </Link>
+                  </Button>
+                )}
               </>}
 
             {!user ? <Button variant="outline" asChild>
@@ -120,6 +154,11 @@ const Navbar: React.FC<NavbarProps> = ({
                 <Button variant="ghost" className="justify-start" asChild>
                   <Link to="/lixeira">Lixeira</Link>
                 </Button>
+                {isAdmin && (
+                  <Button variant="ghost" className="justify-start" asChild>
+                    <Link to="/admin">Painel Admin</Link>
+                  </Button>
+                )}
                 <Button variant="ghost" className="justify-start" onClick={handleSignOut}>
                   Sair
                 </Button>

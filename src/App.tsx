@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import TrashPage from "./pages/Trash";
 import NotFound from "./pages/NotFound";
 import SplashScreen from "./pages/SplashScreen";
+import Admin from "./pages/Admin";
 import Navbar from "./components/Navbar";
 import { TitlesProvider } from "./contexts/TitlesContext";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -101,6 +102,16 @@ const App = () => {
                   }
                 />
                 <Route path="/login" element={<Auth />} />
+                
+                {/* Rota para o painel administrativo */}
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute>
+                      <Admin />
+                    </ProtectedRoute>
+                  }
+                />
                 
                 {/* Catch all unknown routes and ensure they redirect to login if unauthenticated */}
                 <Route path="*" element={
