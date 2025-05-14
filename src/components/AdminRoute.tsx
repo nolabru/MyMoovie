@@ -14,7 +14,7 @@ const AdminRoute: React.FC<AdminRouteProps> = ({
 }) => {
   const { user, loading, isAdmin } = useAuth();
   
-  // Se ainda estiver carregando os dados de autenticação, mostra loading
+  // If still loading auth state, show loading indicator
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -23,12 +23,12 @@ const AdminRoute: React.FC<AdminRouteProps> = ({
     );
   }
   
-  // Se o usuário não estiver logado ou não for admin, redireciona
+  // If the user is not logged in or not an admin, redirect
   if (!user || !isAdmin) {
     return <Navigate to={redirectTo} replace />;
   }
   
-  // Se o usuário for admin, renderiza o conteúdo administrativo
+  // If the user is admin, render the admin content
   return <>{children}</>;
 };
 

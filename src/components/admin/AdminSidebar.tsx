@@ -8,9 +8,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import Logo from "@/components/Logo";
 
 const AdminSidebar = () => {
-  const {
-    signOut
-  } = useAuth();
+  const { signOut } = useAuth();
   const navigate = useNavigate();
   
   const handleSignOut = async () => {
@@ -18,7 +16,8 @@ const AdminSidebar = () => {
     navigate("/login");
   };
   
-  return <aside className="w-64 min-h-screen bg-card border-r flex flex-col">
+  return (
+    <aside className="w-64 min-h-screen bg-card border-r flex flex-col">
       <div className="py-0 border-b">
         <Logo />
       </div>
@@ -49,7 +48,8 @@ const AdminSidebar = () => {
           </div>
         </div>
       </div>
-    </aside>;
+    </aside>
+  );
 };
 
 export default AdminSidebar;
