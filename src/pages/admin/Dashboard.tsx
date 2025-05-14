@@ -6,7 +6,6 @@ import AdminSidebar from "@/components/admin/AdminSidebar";
 import CategoriesManager from "@/components/admin/CategoriesManager";
 import TypesManager from "@/components/admin/TypesManager";
 import UsersManager from "@/components/admin/UsersManager";
-import StatsPanel from "@/components/admin/StatsPanel";
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -20,16 +19,12 @@ const AdminDashboard = () => {
           Bem-vindo, {user?.email}! Gerencie o catálogo aqui.
         </p>
 
-        <Tabs defaultValue="stats" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="stats">Estatísticas</TabsTrigger>
+        <Tabs defaultValue="categories" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="categories">Categorias</TabsTrigger>
             <TabsTrigger value="types">Tipos</TabsTrigger>
             <TabsTrigger value="users">Usuários</TabsTrigger>
           </TabsList>
-          <TabsContent value="stats">
-            <StatsPanel />
-          </TabsContent>
           <TabsContent value="categories">
             <CategoriesManager />
           </TabsContent>
