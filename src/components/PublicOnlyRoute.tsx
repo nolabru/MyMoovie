@@ -1,6 +1,5 @@
-
-import React from "react";
-import { Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface PublicOnlyRouteProps {
@@ -13,6 +12,7 @@ const PublicOnlyRoute: React.FC<PublicOnlyRouteProps> = ({
   redirectTo = "/" 
 }) => {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
   
   // If still loading auth state, show loading indicator
   if (loading) {
@@ -23,9 +23,9 @@ const PublicOnlyRoute: React.FC<PublicOnlyRouteProps> = ({
     );
   }
   
-  // If the user is logged in, redirect to the specified route
+  // If the user is logged in, navigate to home
   if (user) {
-    return <Navigate to={redirectTo} replace />;
+    return <Navigate to="/home" replace />;
   }
   
   // Otherwise, render the children (splash screen)

@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
@@ -50,20 +49,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     let mounted = true;
     
-    // Primeiro configuramos o listener de mudanças de autenticação
+    // First set up the auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
-        console.log('Auth state change:', event, newSession?.user?.email);
-        
         if (!mounted) return;
+        
+        console.log('Auth state change:', event, newSession?.user?.email);
         
         if (newSession) {
           setSession(newSession);
           setUser(newSession.user);
           
-          // Use a separate function to avoid dependency cycles
+          // Use setTimeout to avoid potential deadlocks with Supabase client
           if (newSession.user) {
-            // Invoke checkIsAdmin but don't wait for it in this callback
             setTimeout(() => {
               if (mounted) checkIsAdmin(newSession.user.id, newSession.user.email);
             }, 0);
@@ -76,13 +74,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    // Depois verificamos a sessão atual
+    // Then fetch the current session
     const initializeAuth = async () => {
       try {
         const { data: { session: currentSession } } = await supabase.auth.getSession();
-        console.log('Current session:', currentSession?.user?.email);
         
         if (!mounted) return;
+        
+        console.log('Current session:', currentSession?.user?.email);
         
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
@@ -139,34 +138,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Função para logout - Melhorada para lidar com sessões expiradas e loops
+  // Improved logout function with more robust error handling
   const signOut = async () => {
     try {
-      console.log("Iniciando processo de logout");
+      console.log("Starting logout process");
       
-      // Limpar estados locais primeiro para evitar loops na UI
+      // Clear local state first to prevent UI loops
       setUser(null);
       setSession(null);
       setIsAdmin(false);
       
-      // Depois tentamos fazer logout na API
+      // Force clear local storage
+      localStorage.removeItem('supabase.auth.token');
+      
+      // Then attempt API logout
       const { error } = await supabase.auth.signOut();
       
       if (error) {
-        // Ignorar erros específicos de sessão que não afetam a experiência do usuário
         if (error.message.includes("Session not found")) {
-          console.log("Sessão já expirada, continuando com logout local");
+          console.log("Session already expired, continuing with local logout");
         } else {
-          console.error("Erro durante logout:", error);
+          console.error("Error during logout:", error);
           throw error;
         }
       }
       
       toast.success("Logout realizado com sucesso!");
+      
+      // Force a reload to ensure clean state
+      setTimeout(() => {
+        window.location.href = '/apresentacao';
+      }, 500);
+      
     } catch (error: any) {
-      console.error("Erro durante logout:", error);
+      console.error("Error during logout:", error);
       toast.error(error.message || "Erro ao fazer logout");
-      // Não lançamos o erro de volta para permitir que a navegação continue
+      
+      // Even on error, redirect to ensure user can escape
+      setTimeout(() => {
+        window.location.href = '/apresentacao';
+      }, 500);
     }
   };
 
