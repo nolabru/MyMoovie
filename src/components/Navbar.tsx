@@ -86,6 +86,14 @@ const Navbar: React.FC<NavbarProps> = ({
           <ThemeToggle />
           
           {/* Profile button - now before search */}
+             
+          {/* Search form - now after profile button with increased width */}
+          <form onSubmit={handleSearch} className="flex flex-1 max-w-xl">
+            <div className="relative w-full">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input type="search" placeholder="Buscar..." className="w-full pl-8" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+            </div>
+          </form>
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">
@@ -124,14 +132,7 @@ const Navbar: React.FC<NavbarProps> = ({
               </div>
             </SheetContent>
           </Sheet>
-          
-          {/* Search form - now after profile button with increased width */}
-          <form onSubmit={handleSearch} className="flex flex-1 max-w-xl">
-            <div className="relative w-full">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input type="search" placeholder="Buscar..." className="w-full pl-8" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-            </div>
-          </form>
+       
         </div>
       </div>
 
