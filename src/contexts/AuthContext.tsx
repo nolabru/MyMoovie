@@ -47,19 +47,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Check admin status whenever user changes
+  useEffect(() => {
+    if (user) {
+      // We need to wrap the checkAdminStatus call in a function to avoid
+      // React hook dependency warnings
+      const verifyAdmin = async () => {
+        await checkAdminStatus();
+      };
+      
+      verifyAdmin();
+    } else {
+      setIsAdmin(false);
+      setAdminLoading(false);
+    }
+  }, [user]);
+
   useEffect(() => {
     // Verificar sessão atual
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
-
-      // Se o usuário estiver logado, verifica se é admin
-      if (session?.user) {
-        checkAdminStatus();
-      } else {
-        setAdminLoading(false);
-      }
     });
 
     // Configurar listener para mudanças de autenticação
@@ -67,16 +76,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       (_, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        
-        // Se o usuário estiver logado, verifica se é admin
-        if (session?.user) {
-          setTimeout(() => {
-            checkAdminStatus();
-          }, 0);
-        } else {
-          setIsAdmin(false);
-          setAdminLoading(false);
-        }
       }
     );
 

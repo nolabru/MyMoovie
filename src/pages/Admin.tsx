@@ -16,13 +16,13 @@ const Admin: React.FC = () => {
     user,
     loading,
     isAdmin,
-    adminLoading,
-    checkAdminStatus
+    adminLoading
   } = useAuth();
   const navigate = useNavigate();
   const [verifyingAccess, setVerifyingAccess] = useState<boolean>(true);
 
   useEffect(() => {
+    // Only verify access once when the component mounts or when auth state changes
     const verifyAccess = async () => {
       console.log("Admin.tsx: Verificando acesso, user:", !!user, "loading:", loading);
       
@@ -41,27 +41,27 @@ const Admin: React.FC = () => {
         setVerifyingAccess(true);
         console.log("Admin.tsx: Verificando acesso administrativo para:", user.email);
         
-        // Adicionando um pequeno delay para garantir que o estado de autenticação está completamente estabelecido
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // We don't need to call checkAdminStatus again since we already have isAdmin from useAuth
+        // This was causing the infinite loop
+        console.log("Admin.tsx: Resultado da verificação de admin:", isAdmin);
         
-        const isUserAdmin = await checkAdminStatus();
-        console.log("Admin.tsx: Resultado da verificação de admin:", isUserAdmin);
-        
-        if (!isUserAdmin) {
+        if (!isAdmin) {
           toast.error("Acesso restrito a administradores");
-          navigate("/home");
+          navigate("/");
         }
       } catch (error) {
         console.error("Admin.tsx: Erro ao verificar permissões:", error);
         toast.error("Erro ao verificar permissões");
-        navigate("/home");
+        navigate("/");
       } finally {
         setVerifyingAccess(false);
       }
     };
     
-    verifyAccess();
-  }, [user, loading, navigate, checkAdminStatus]);
+    if (!loading && !adminLoading) {
+      verifyAccess();
+    }
+  }, [user, loading, adminLoading, isAdmin, navigate]);
 
   // Mostra um indicador de carregamento enquanto verifica autenticação e permissões
   if (loading || adminLoading || verifyingAccess) {
