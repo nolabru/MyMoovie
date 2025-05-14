@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Menu, User, Plus, Trash, LogOut, Settings } from "lucide-react";
@@ -42,6 +41,12 @@ const Navbar: React.FC<NavbarProps> = ({
   const getUserInitials = () => {
     if (!user || !user.email) return "U";
     return user.email.charAt(0).toUpperCase();
+  };
+
+  // Extrai o nome de usuário do email (parte antes do @)
+  const getUserName = () => {
+    if (!user || !user.email) return "Usuário";
+    return user.email.split('@')[0];
   };
 
   return <nav className="border-b sticky top-0 bg-background z-50">
@@ -110,7 +115,7 @@ const Navbar: React.FC<NavbarProps> = ({
                       <AvatarFallback>{getUserInitials()}</AvatarFallback>
                     </Avatar>
                     <div className="ml-4">
-                      <h2 className="font-medium">{user?.email}</h2>
+                      <h2 className="font-medium">{getUserName()}</h2>
                       <p className="text-sm text-muted-foreground">{isAdmin ? 'Administrador' : 'Usuário'}</p>
                     </div>
                   </div>
