@@ -1,134 +1,183 @@
-
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Menu, User, Plus, Trash, LogOut } from "lucide-react";
+import { Search, Home, Plus, Menu, X, LogOut, FolderIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import Logo from "./Logo";
+import { ThemeToggle } from "./ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import ThemeToggle from "./ThemeToggle";
+import { useMobile } from "@/hooks/use-mobile";
+import { toast } from "sonner";
+import Logo from "./Logo";
+import { Trash2 } from "lucide-react";
 
-interface NavbarProps {
-  onSearch: (query: string) => void;
-}
-
-const Navbar: React.FC<NavbarProps> = ({
-  onSearch
-}) => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const {
-    user,
-    signOut
-  } = useAuth();
+const Navbar = ({ onSearch }: { onSearch: (query: string) => void }) => {
+  const [search, setSearch] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useMobile();
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSearch(searchQuery);
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
   };
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate("/apresentacao");
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao fazer logout");
+    }
   };
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate("/login");
-  };
+  // Check if the current user is an admin (email ends with @admin.com)
+  const isAdmin = user && user.email?.endsWith('@admin.com');
 
-  const getUserInitials = () => {
-    if (!user || !user.email) return "U";
-    return user.email.charAt(0).toUpperCase();
-  };
-
-  return <nav className="border-b sticky top-0 bg-background z-50">
-      <div className="container mx-auto px-2 flex items-center justify-between">
-        <div className="flex items-center">
-          <Link to="/home" className="mr-6">
-            <Logo />
-          </Link>
+  return (
+    <nav className="sticky top-0 z-10 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+      <div className="flex h-16 items-center px-4 container mx-auto">
+        <div className="flex items-center gap-2">
+          <Logo />
+          <span className="sr-only md:not-sr-only md:text-xl font-semibold">
+            MediaFlow
+          </span>
         </div>
 
-        <div className="hidden md:flex items-center flex-grow max-w-md mx-4">
-          <form onSubmit={handleSearch} className="w-full relative">
-            <Input type="text" placeholder="Buscar por título..." className="pr-10 w-full" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-            <button type="submit" className="absolute right-3 top-1/2 transform -translate-y-1/2" aria-label="Buscar">
-              <Search className="h-4 w-4 text-muted-foreground" />
-            </button>
-          </form>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <ThemeToggle />
-          
-          <div className="hidden md:flex items-center space-x-2">
-            {user && <>
-                <Button variant="ghost" asChild>
-                  <Link to="/adicionar">
-                    <Plus className="h-4 w-4 mr-1" />
-                    Adicionar
-                  </Link>
-                </Button>
-                <Button variant="ghost" asChild>
-                  <Link to="/lixeira">
-                    <Trash className="h-4 w-4 mr-1" />
-                    Lixeira
-                  </Link>
-                </Button>
-              </>}
-
-            {!user ? <Button variant="outline" asChild>
-                <Link to="/login">
-                  <User className="h-4 w-4 mr-1" />
-                  Entrar
-                </Link>
-              </Button> : <div className="flex items-center gap-5">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback>{getUserInitials()}</AvatarFallback>
-                </Avatar>
-                <Button variant="outline" onClick={handleSignOut}>
-                  <LogOut className="h-4 w-4 mr-1" />
-                  Sair
-                </Button>
-              </div>}
+        <div className="flex items-center ml-auto gap-2">
+          {/* Display search on large screens */}
+          <div className="relative hidden md:block w-96">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Buscar..."
+              onChange={(e) => {
+                onSearch(e.target.value);
+                setSearch(e.target.value);
+              }}
+              className="w-full pl-8 bg-muted"
+            />
           </div>
 
-          <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleMenu}>
-            <Menu className="h-6 w-6" />
-          </Button>
+          {isMobile ? (
+            <>
+              {/* Mobile Menu Toggle */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleMobileMenu}
+                aria-label="Menu"
+              >
+                {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              </Button>
+
+              {/* Mobile Menu */}
+              {mobileMenuOpen && (
+                <div className="absolute top-16 right-0 w-full bg-background border-b shadow-lg z-10">
+                  <div className="flex flex-col p-4 gap-2">
+                    <div className="relative w-full mb-4">
+                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="search"
+                        placeholder="Buscar..."
+                        onChange={(e) => {
+                          onSearch(e.target.value);
+                          setSearch(e.target.value);
+                        }}
+                        className="w-full pl-8 bg-muted"
+                      />
+                    </div>
+                    
+                    <Button asChild variant="ghost" className="justify-start">
+                      <Link to="/home">
+                        <Home className="mr-2 h-4 w-4" />
+                        Início
+                      </Link>
+                    </Button>
+                    
+                    <Button asChild variant="ghost" className="justify-start">
+                      <Link to="/adicionar">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Adicionar
+                      </Link>
+                    </Button>
+                    
+                    <Button asChild variant="ghost" className="justify-start">
+                      <Link to="/lixeira">
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Lixeira
+                      </Link>
+                    </Button>
+
+                    {/* Admin menu items for mobile */}
+                    {isAdmin && (
+                      <Button asChild variant="ghost" className="justify-start">
+                        <Link to="/admin/categorias">
+                          <FolderIcon className="mr-2 h-4 w-4" />
+                          Gerenciar Categorias
+                        </Link>
+                      </Button>
+                    )}
+                    
+                    <ThemeToggle />
+                    
+                    <Button
+                      variant="ghost"
+                      className="justify-start"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sair
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              {/* Desktop Navigation */}
+              <Button asChild variant="ghost" size="icon">
+                <Link to="/home" aria-label="Início">
+                  <Home className="h-5 w-5" />
+                </Link>
+              </Button>
+              
+              <Button asChild variant="ghost" size="icon">
+                <Link to="/adicionar" aria-label="Adicionar">
+                  <Plus className="h-5 w-5" />
+                </Link>
+              </Button>
+              
+              <Button asChild variant="ghost" size="icon">
+                <Link to="/lixeira" aria-label="Lixeira">
+                  <Trash2 className="h-5 w-5" />
+                </Link>
+              </Button>
+
+              {/* Admin menu items for desktop */}
+              {isAdmin && (
+                <Button asChild variant="ghost" size="icon">
+                  <Link to="/admin/categorias" aria-label="Gerenciar Categorias">
+                    <FolderIcon className="h-5 w-5" />
+                  </Link>
+                </Button>
+              )}
+              
+              <ThemeToggle />
+              
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleLogout}
+                aria-label="Sair"
+              >
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </>
+          )}
         </div>
       </div>
-
-      {/* Menu mobile */}
-      {isMenuOpen && <div className="md:hidden p-4 bg-background border-t">
-          <form onSubmit={handleSearch} className="mb-4 relative">
-            <Input type="text" placeholder="Buscar por título..." className="pr-10 w-full" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-            <button type="submit" className="absolute right-3 top-1/2 transform -translate-y-1/2">
-              <Search className="h-4 w-4 text-muted-foreground" />
-            </button>
-          </form>
-          <div className="flex flex-col space-y-2">
-            <Button variant="ghost" className="justify-start" asChild>
-              <Link to="/">Início</Link>
-            </Button>
-            {user ? <>
-                <Button variant="ghost" className="justify-start" asChild>
-                  <Link to="/adicionar">Adicionar Título</Link>
-                </Button>
-                <Button variant="ghost" className="justify-start" asChild>
-                  <Link to="/lixeira">Lixeira</Link>
-                </Button>
-                <Button variant="ghost" className="justify-start" onClick={handleSignOut}>
-                  Sair
-                </Button>
-              </> : <Button variant="ghost" className="justify-start" asChild>
-                <Link to="/login">Entrar</Link>
-              </Button>}
-          </div>
-        </div>}
-    </nav>;
+    </nav>
+  );
 };
 
 export default Navbar;

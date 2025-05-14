@@ -11,11 +11,13 @@ import Auth from "./pages/Auth";
 import TrashPage from "./pages/Trash";
 import NotFound from "./pages/NotFound";
 import SplashScreen from "./pages/SplashScreen";
+import AdminCategories from "./pages/AdminCategories";
 import Navbar from "./components/Navbar";
 import { TitlesProvider } from "./contexts/TitlesContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import PublicOnlyRoute from "./components/PublicOnlyRoute";
+import AdminRoute from "./components/AdminRoute";
 import { useAuth } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 
@@ -58,6 +60,16 @@ const App = () => {
                       <Home searchQuery={searchQuery} />
                     </>
                   </ProtectedRoute>
+                } />
+                
+                {/* Admin Panel - Only accessible with admin email */}
+                <Route path="/admin/categorias" element={
+                  <AdminRoute>
+                    <>
+                      <Navbar onSearch={setSearchQuery} />
+                      <AdminCategories />
+                    </>
+                  </AdminRoute>
                 } />
                 
                 {/* Splash screen as presentation route */}
