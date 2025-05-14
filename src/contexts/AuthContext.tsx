@@ -23,16 +23,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAdmin, setIsAdmin] = useState(false);
 
   // Verificar se o usuário é administrador
-  const checkIsAdmin = async (userId: string, userEmail?: string | null) => {
-    if (!userId) return;
+  const checkIsAdmin = async (userId: string, userEmail: string | null | undefined) => {
+    if (!userId) return false;
     
     try {
       // Primeiro verificamos se o email tem o sufixo @admin.com
-      // Usamos o email passado como parâmetro para evitar dependência do estado user
-      const email = userEmail || '';
-      if (email.endsWith('@admin.com')) {
+      if (userEmail && userEmail.endsWith('@admin.com')) {
         setIsAdmin(true);
-        return;
+        return true;
       }
       
       // Se não for admin pelo email, verificamos na tabela de roles
@@ -41,25 +39,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
       if (error) throw error;
       setIsAdmin(!!data);
+      return !!data;
     } catch (error) {
       console.error('Erro ao verificar função de administrador:', error);
       setIsAdmin(false);
+      return false;
     }
   };
 
   useEffect(() => {
+    let mounted = true;
+    
     // Primeiro configuramos o listener de mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
         console.log('Auth state change:', event, newSession?.user?.email);
-        setSession(newSession);
-        if (newSession?.user) {
+        
+        if (!mounted) return;
+        
+        if (newSession) {
+          setSession(newSession);
           setUser(newSession.user);
-          // Usamos setTimeout para evitar ciclos de dependência
-          setTimeout(() => {
-            checkIsAdmin(newSession.user.id, newSession.user.email);
-          }, 0);
+          
+          // Use a separate function to avoid dependency cycles
+          if (newSession.user) {
+            // Invoke checkIsAdmin but don't wait for it in this callback
+            setTimeout(() => {
+              if (mounted) checkIsAdmin(newSession.user.id, newSession.user.email);
+            }, 0);
+          }
         } else {
+          setSession(null);
           setUser(null);
           setIsAdmin(false);
         }
@@ -67,20 +77,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     // Depois verificamos a sessão atual
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      console.log('Current session:', currentSession?.user?.email);
-      setSession(currentSession);
-      
-      if (currentSession?.user) {
-        setUser(currentSession.user);
-        // Verificamos isAdmin depois de definir user e session
-        checkIsAdmin(currentSession.user.id, currentSession.user.email);
+    const initializeAuth = async () => {
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        console.log('Current session:', currentSession?.user?.email);
+        
+        if (!mounted) return;
+        
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        
+        if (currentSession?.user) {
+          await checkIsAdmin(currentSession.user.id, currentSession.user.email);
+        }
+      } catch (error) {
+        console.error('Error getting session:', error);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
       }
-      
-      setLoading(false);
-    });
+    };
 
-    return () => subscription.unsubscribe();
+    initializeAuth();
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Função para cadastro de usuários
@@ -115,27 +139,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Função para logout - Melhorada para lidar com sessões expiradas
+  // Função para logout - Melhorada para lidar com sessões expiradas e loops
   const signOut = async () => {
     try {
-      // Mesmo se não houver sessão ativa, tentamos fazer logout para limpar qualquer estado
-      const { error } = await supabase.auth.signOut();
+      console.log("Iniciando processo de logout");
       
-      // Se houver erro mas for relacionado a sessão não encontrada, consideramos como sucesso
-      if (error && !error.message.includes("Session not found")) {
-        throw error;
-      }
-      
-      // Limpar estados locais independentemente do resultado do signOut
+      // Limpar estados locais primeiro para evitar loops na UI
       setUser(null);
       setSession(null);
       setIsAdmin(false);
+      
+      // Depois tentamos fazer logout na API
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        // Ignorar erros específicos de sessão que não afetam a experiência do usuário
+        if (error.message.includes("Session not found")) {
+          console.log("Sessão já expirada, continuando com logout local");
+        } else {
+          console.error("Erro durante logout:", error);
+          throw error;
+        }
+      }
       
       toast.success("Logout realizado com sucesso!");
     } catch (error: any) {
       console.error("Erro durante logout:", error);
       toast.error(error.message || "Erro ao fazer logout");
-      throw error;
+      // Não lançamos o erro de volta para permitir que a navegação continue
     }
   };
 
