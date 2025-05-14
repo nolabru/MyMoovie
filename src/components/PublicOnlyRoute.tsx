@@ -12,7 +12,10 @@ const PublicOnlyRoute: React.FC<PublicOnlyRouteProps> = ({
   children, 
   redirectTo = "/" 
 }) => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  
+  // If still loading auth state, show nothing to prevent flash
+  if (loading) return null;
   
   // If the user is logged in, redirect to the specified route
   if (user) {
