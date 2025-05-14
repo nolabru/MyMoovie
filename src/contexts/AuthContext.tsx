@@ -22,48 +22,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  useEffect(() => {
-    // Verificar sessão atual
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        checkIsAdmin(session.user.id);
-      }
-      
-      setLoading(false);
-    });
-
-    // Configurar listener para mudanças de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          checkIsAdmin(session.user.id);
-        } else {
-          setIsAdmin(false);
-        }
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, []);
-
   // Verificar se o usuário é administrador
-  const checkIsAdmin = async (userId: string) => {
+  const checkIsAdmin = async (userId: string, userEmail?: string | null) => {
     if (!userId) return;
     
     try {
-      const email = user?.email || '';
+      // Primeiro verificamos se o email tem o sufixo @admin.com
+      // Usamos o email passado como parâmetro para evitar dependência do estado user
+      const email = userEmail || '';
       if (email.endsWith('@admin.com')) {
         setIsAdmin(true);
         return;
       }
       
-      // Verificar na tabela user_roles se o usuário tem a role de admin
+      // Se não for admin pelo email, verificamos na tabela de roles
       const { data, error } = await supabase
         .rpc('is_admin', { user_id: userId });
         
@@ -74,6 +46,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsAdmin(false);
     }
   };
+
+  useEffect(() => {
+    // Primeiro configuramos o listener de mudanças de autenticação
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_, newSession) => {
+        setSession(newSession);
+        if (newSession?.user) {
+          setUser(newSession.user);
+          // Usamos setTimeout para evitar ciclos de dependência
+          setTimeout(() => {
+            checkIsAdmin(newSession.user.id, newSession.user.email);
+          }, 0);
+        } else {
+          setUser(null);
+          setIsAdmin(false);
+        }
+      }
+    );
+
+    // Depois verificamos a sessão atual
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      setSession(currentSession);
+      
+      if (currentSession?.user) {
+        setUser(currentSession.user);
+        // Verificamos isAdmin depois de definir user e session
+        checkIsAdmin(currentSession.user.id, currentSession.user.email);
+      }
+      
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Função para cadastro de usuários
   const signUp = async (email: string, password: string) => {
