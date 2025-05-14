@@ -10,7 +10,7 @@ interface AdminRouteProps {
 
 const AdminRoute: React.FC<AdminRouteProps> = ({ 
   children, 
-  redirectTo = "/home" 
+  redirectTo = "/admin/categorias" 
 }) => {
   const { user, loading } = useAuth();
   
@@ -28,7 +28,7 @@ const AdminRoute: React.FC<AdminRouteProps> = ({
   
   // If the user is not an admin, redirect to the specified route
   if (!isAdmin) {
-    return <Navigate to={redirectTo} replace />;
+    return <Navigate to="/home" replace />;
   }
   
   // Otherwise, render the children (admin content)

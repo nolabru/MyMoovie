@@ -25,7 +25,7 @@ import { Loader2 } from "lucide-react";
 const queryClient = new QueryClient();
 
 // Improved ProtectedRoute component with better loading and auth state handling
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+const ProtectedRoute = ({ children, adminRedirect = false }: { children: React.ReactNode, adminRedirect?: boolean }) => {
   const { user, loading } = useAuth();
   
   // Show loading indicator while auth state is being determined
@@ -42,7 +42,13 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/apresentacao" replace />;
   }
   
-  // User is authenticated, render the protected content
+  // If user is admin and this route should redirect admins, send to admin categories
+  const isAdmin = user.email?.endsWith('@admin.com');
+  if (isAdmin && adminRedirect) {
+    return <Navigate to="/admin/categorias" replace />;
+  }
+  
+  // User is authenticated and not an admin (or admin on allowed route), render the protected content
   return <>{children}</>;
 };
 
@@ -73,9 +79,9 @@ const App = () => {
                   </PublicOnlyRoute>
                 } />
                 
-                {/* Protected routes - only accessible when logged in */}
+                {/* Protected routes - only accessible when logged in (and NOT for admins) */}
                 <Route path="/home" element={
-                  <ProtectedRoute>
+                  <ProtectedRoute adminRedirect={true}>
                     <>
                       <Navbar onSearch={setSearchQuery} />
                       <Home searchQuery={searchQuery} />
@@ -95,7 +101,7 @@ const App = () => {
                 <Route
                   path="/adicionar"
                   element={
-                    <ProtectedRoute>
+                    <ProtectedRoute adminRedirect={true}>
                       <>
                         <Navbar onSearch={setSearchQuery} />
                         <TitleForm />
@@ -107,7 +113,7 @@ const App = () => {
                 <Route
                   path="/editar/:id"
                   element={
-                    <ProtectedRoute>
+                    <ProtectedRoute adminRedirect={true}>
                       <>
                         <Navbar onSearch={setSearchQuery} />
                         <TitleForm />
@@ -119,7 +125,7 @@ const App = () => {
                 <Route
                   path="/lixeira"
                   element={
-                    <ProtectedRoute>
+                    <ProtectedRoute adminRedirect={true}>
                       <>
                         <Navbar onSearch={setSearchQuery} />
                         <TrashPage />
