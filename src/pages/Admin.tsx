@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,22 +8,23 @@ import CategoriesList from "@/components/admin/CategoriesList";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield } from "lucide-react";
-
 const Admin: React.FC = () => {
-  const { user, loading, isAdmin, checkAdminStatus } = useAuth();
+  const {
+    user,
+    loading,
+    isAdmin,
+    checkAdminStatus
+  } = useAuth();
   const navigate = useNavigate();
   const [adminLoading, setAdminLoading] = useState<boolean>(true);
-
   useEffect(() => {
     const verifyAccess = async () => {
       if (!user) {
         return;
       }
-
       try {
         setAdminLoading(true);
         const isUserAdmin = await checkAdminStatus();
-        
         if (!isUserAdmin) {
           toast.error("Acesso restrito a administradores");
           navigate("/home");
@@ -37,7 +37,6 @@ const Admin: React.FC = () => {
         setAdminLoading(false);
       }
     };
-
     if (user) {
       verifyAccess();
     } else if (!loading) {
@@ -45,21 +44,15 @@ const Admin: React.FC = () => {
       navigate("/login");
     }
   }, [user, loading, navigate, checkAdminStatus]);
-
   if (loading || adminLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
+    return <div className="flex items-center justify-center min-h-screen">
         <div className="animate-pulse text-lg">Carregando...</div>
-      </div>
-    );
+      </div>;
   }
-
   if (!isAdmin) {
     return null; // Evita renderização durante redirecionamento
   }
-
-  return (
-    <>
+  return <>
       <Navbar onSearch={() => {}} />
       <div className="container py-8">
         <div className="flex items-center gap-2 mb-6">
@@ -67,14 +60,7 @@ const Admin: React.FC = () => {
           <h1 className="text-2xl font-bold">Painel Administrativo</h1>
         </div>
 
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Bem-vindo ao Painel Administrativo</CardTitle>
-            <CardDescription>
-              Gerencie as categorias do sistema. Apenas usuários com emails @admin.com têm acesso a este painel.
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        
 
         <Tabs defaultValue="listar" className="w-full">
           <TabsList className="mb-6">
@@ -91,8 +77,6 @@ const Admin: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </>
-  );
+    </>;
 };
-
 export default Admin;
