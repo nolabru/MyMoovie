@@ -9,56 +9,87 @@ import CategoriesList from "@/components/admin/CategoriesList";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Admin: React.FC = () => {
   const {
     user,
     loading,
     isAdmin,
+    adminLoading,
     checkAdminStatus
   } = useAuth();
   const navigate = useNavigate();
-  const [adminLoading, setAdminLoading] = useState<boolean>(true);
+  const [verifyingAccess, setVerifyingAccess] = useState<boolean>(true);
 
   useEffect(() => {
     const verifyAccess = async () => {
+      console.log("Admin.tsx: Verificando acesso, user:", !!user, "loading:", loading);
+      
+      if (!user && !loading) {
+        console.log("Admin.tsx: Usuário não autenticado, redirecionando para login");
+        toast.error("Faça login para acessar esta página");
+        navigate("/login");
+        return;
+      }
+      
       if (!user) {
         return;
       }
+      
       try {
-        setAdminLoading(true);
+        setVerifyingAccess(true);
+        console.log("Admin.tsx: Verificando acesso administrativo para:", user.email);
+        
+        // Adicionando um pequeno delay para garantir que o estado de autenticação está completamente estabelecido
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
         const isUserAdmin = await checkAdminStatus();
+        console.log("Admin.tsx: Resultado da verificação de admin:", isUserAdmin);
+        
         if (!isUserAdmin) {
           toast.error("Acesso restrito a administradores");
           navigate("/home");
         }
       } catch (error) {
-        console.error("Erro ao verificar permissões:", error);
+        console.error("Admin.tsx: Erro ao verificar permissões:", error);
         toast.error("Erro ao verificar permissões");
         navigate("/home");
       } finally {
-        setAdminLoading(false);
+        setVerifyingAccess(false);
       }
     };
-    if (user) {
-      verifyAccess();
-    } else if (!loading) {
-      setAdminLoading(false);
-      navigate("/login");
-    }
+    
+    verifyAccess();
   }, [user, loading, navigate, checkAdminStatus]);
 
-  if (loading || adminLoading) {
-    return <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-pulse text-lg">Carregando...</div>
-      </div>;
+  // Mostra um indicador de carregamento enquanto verifica autenticação e permissões
+  if (loading || adminLoading || verifyingAccess) {
+    return (
+      <>
+        <Navbar onSearch={() => {}} adminOnly={true} />
+        <div className="container py-8">
+          <div className="flex items-center gap-2 mb-6">
+            <Skeleton className="h-6 w-6 rounded-full" />
+            <Skeleton className="h-8 w-48" />
+          </div>
+          
+          <div className="space-y-4">
+            <Skeleton className="h-10 w-48" />
+            <Skeleton className="h-48 w-full" />
+          </div>
+        </div>
+      </>
+    );
   }
 
+  // Evita renderização durante redirecionamento
   if (!isAdmin) {
-    return null; // Evita renderização durante redirecionamento
+    return null;
   }
 
-  return <>
+  return (
+    <>
       <Navbar onSearch={() => {}} adminOnly={true} />
       <div className="container py-8">
         <div className="flex items-center gap-2 mb-6">
@@ -81,7 +112,8 @@ const Admin: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </>;
+    </>
+  );
 };
 
 export default Admin;

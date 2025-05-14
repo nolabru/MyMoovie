@@ -8,7 +8,7 @@ import { useTitles } from "@/contexts/TitlesContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Plus, User } from "lucide-react";
+import { Plus, User, Trash } from "lucide-react";
 
 type SortOption = "name_asc" | "name_desc" | "rating_asc" | "rating_desc" | null;
 
@@ -25,6 +25,7 @@ const Home: React.FC<{
   } = useTitles();
   const {
     user,
+    isAdmin,
     loading: authLoading
   } = useAuth();
   const [typeFilter, setTypeFilter] = useState<TitleType | null>(null);
@@ -78,16 +79,27 @@ const Home: React.FC<{
     navigate("/adicionar");
   };
 
+  const handleTrashClick = () => {
+    navigate("/lixeira");
+  };
+
   const loading = authLoading || titlesLoading;
 
   return <div className="container mx-auto py-6 px-4">
-      <div className="flex justify-end items-center mb-6">
-        
-        <Button onClick={handleAddTitle}>
-          <Plus className="h-4 w-4 mr-1" />
-          Adicionar Título
-        </Button>
-      </div>
+      {/* Mostrar botões apenas para usuários não-administradores */}
+      {user && !isAdmin && (
+        <div className="flex justify-between items-center mb-6">
+          <Button variant="outline" onClick={handleTrashClick}>
+            <Trash className="h-4 w-4 mr-1" />
+            Lixeira
+          </Button>
+          
+          <Button onClick={handleAddTitle}>
+            <Plus className="h-4 w-4 mr-1" />
+            Adicionar Título
+          </Button>
+        </div>
+      )}
 
       <Filters typeFilter={typeFilter} setTypeFilter={setTypeFilter} categoryFilter={categoryFilter} setCategoryFilter={setCategoryFilter} sortOption={sortOption} setSortOption={setSortOption} />
 
