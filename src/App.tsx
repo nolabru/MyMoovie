@@ -22,7 +22,28 @@ import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
 
-// Improved component for protected routes
+// Protected route for regular users only (not admins)
+const RegularUserRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading, isAdmin } = useAuth();
+  
+  // If still loading auth state, show nothing to prevent flash
+  if (loading) return null;
+  
+  // If no user is logged in, redirect to presentation page
+  if (!user) {
+    return <Navigate to="/apresentacao" replace />;
+  }
+  
+  // If user is admin, redirect to admin page
+  if (isAdmin) {
+    return <Navigate to="/admin" replace />;
+  }
+  
+  // User is authenticated and not an admin, show the protected content
+  return <>{children}</>;
+};
+
+// Protected route for any authenticated user
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
@@ -35,6 +56,27 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   // User is authenticated, show the protected content
+  return <>{children}</>;
+};
+
+// Protected route only for admin users
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading, isAdmin } = useAuth();
+  
+  // If still loading auth state, show nothing to prevent flash
+  if (loading) return null;
+  
+  // If no user is logged in, redirect to presentation page
+  if (!user) {
+    return <Navigate to="/apresentacao" replace />;
+  }
+  
+  // If user is not an admin, redirect to home
+  if (!isAdmin) {
+    return <Navigate to="/home" replace />;
+  }
+  
+  // User is authenticated and admin, show the protected content
   return <>{children}</>;
 };
 
@@ -51,14 +93,14 @@ const App = () => {
                 {/* Root path redirects based on auth state */}
                 <Route path="/" element={<Index />} />
                 
-                {/* Dashboard - Only accessible when logged in */}
+                {/* Dashboard - Only accessible for regular users */}
                 <Route path="/home" element={
-                  <ProtectedRoute>
+                  <RegularUserRoute>
                     <>
                       <Navbar onSearch={setSearchQuery} />
                       <Home searchQuery={searchQuery} />
                     </>
-                  </ProtectedRoute>
+                  </RegularUserRoute>
                 } />
                 
                 {/* Splash screen as presentation route */}
@@ -71,54 +113,50 @@ const App = () => {
                 <Route
                   path="/adicionar"
                   element={
-                    <ProtectedRoute>
+                    <RegularUserRoute>
                       <>
                         <Navbar onSearch={setSearchQuery} />
                         <TitleForm />
                       </>
-                    </ProtectedRoute>
+                    </RegularUserRoute>
                   }
                 />
                 <Route
                   path="/editar/:id"
                   element={
-                    <ProtectedRoute>
+                    <RegularUserRoute>
                       <>
                         <Navbar onSearch={setSearchQuery} />
                         <TitleForm />
                       </>
-                    </ProtectedRoute>
+                    </RegularUserRoute>
                   }
                 />
                 <Route
                   path="/lixeira"
                   element={
-                    <ProtectedRoute>
+                    <RegularUserRoute>
                       <>
                         <Navbar onSearch={setSearchQuery} />
                         <TrashPage />
                       </>
-                    </ProtectedRoute>
+                    </RegularUserRoute>
                   }
                 />
                 <Route path="/login" element={<Auth />} />
                 
-                {/* Rota para o painel administrativo */}
+                {/* Rota para o painel administrativo - apenas para admin */}
                 <Route
                   path="/admin"
                   element={
-                    <ProtectedRoute>
+                    <AdminRoute>
                       <Admin />
-                    </ProtectedRoute>
+                    </AdminRoute>
                   }
                 />
                 
-                {/* Catch all unknown routes and ensure they redirect to login if unauthenticated */}
-                <Route path="*" element={
-                  <ProtectedRoute>
-                    <NotFound />
-                  </ProtectedRoute>
-                } />
+                {/* Catch all unknown routes and ensure they redirect appropriately */}
+                <Route path="*" element={<NotFound />} />
               </Routes>
               <Sonner />
               <Toaster />

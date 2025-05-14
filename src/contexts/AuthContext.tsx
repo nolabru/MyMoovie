@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
@@ -8,7 +9,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   isAdmin: boolean;
-  adminLoading: boolean;  // Adicionando propriedade na interface
+  adminLoading: boolean;
   checkAdminStatus: () => Promise<boolean>;
   signUp: (email: string, password: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
@@ -29,14 +30,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return false;
 
     try {
-      const { data, error } = await supabase.rpc('is_admin', { user_id: user.id });
-      
-      if (error) {
-        throw error;
-      }
-      
-      setIsAdmin(!!data);
-      return !!data;
+      // Verificar diretamente se o email termina com @admin.com
+      const isUserAdmin = user.email ? user.email.endsWith('@admin.com') : false;
+      setIsAdmin(isUserAdmin);
+      return isUserAdmin;
     } catch (error: any) {
       console.error("Erro ao verificar status de admin:", error.message);
       return false;

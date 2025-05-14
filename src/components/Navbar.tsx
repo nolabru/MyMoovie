@@ -92,20 +92,23 @@ const Navbar: React.FC<NavbarProps> = ({
           </Link>
         </div>
 
-        <div className="hidden md:flex items-center flex-grow max-w-md mx-4">
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            onSearch(searchQuery);
-          }} className="w-full relative">
-            <Input type="text" placeholder="Buscar por título..." className="pr-10 w-full" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-            <button type="submit" className="absolute right-3 top-1/2 transform -translate-y-1/2" aria-label="Buscar">
-              <Search className="h-4 w-4 text-muted-foreground" />
-            </button>
-          </form>
-        </div>
+        {/* Search bar - only visible for non-admin users */}
+        {!isAdmin && (
+          <div className="hidden md:flex items-center flex-grow max-w-md mx-4">
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              onSearch(searchQuery);
+            }} className="w-full relative">
+              <Input type="text" placeholder="Buscar por título..." className="pr-10 w-full" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+              <button type="submit" className="absolute right-3 top-1/2 transform -translate-y-1/2" aria-label="Buscar">
+                <Search className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </form>
+          </div>
+        )}
 
         <div className="flex items-center gap-4">
-          {/* Botões de lixeira e adicionar título - apenas para usuários comuns autenticados */}
+          {/* Botões de lixeira e adicionar título - apenas para usuários comuns autenticados (não-admin) */}
           {user && !isAdmin && (
             <div className="hidden md:flex gap-2">
               <Button variant="ghost" size="icon" onClick={handleTrashClick} title="Lixeira">
@@ -160,19 +163,26 @@ const Navbar: React.FC<NavbarProps> = ({
       {/* Menu mobile */}
       {isMenuOpen && (
         <div className="md:hidden p-4 bg-background border-t">
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            onSearch(searchQuery);
-          }} className="mb-4 relative">
-            <Input type="text" placeholder="Buscar por título..." className="pr-10 w-full" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-            <button type="submit" className="absolute right-3 top-1/2 transform -translate-y-1/2">
-              <Search className="h-4 w-4 text-muted-foreground" />
-            </button>
-          </form>
+          {/* Only show search for non-admin users */}
+          {!isAdmin && (
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              onSearch(searchQuery);
+            }} className="mb-4 relative">
+              <Input type="text" placeholder="Buscar por título..." className="pr-10 w-full" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+              <button type="submit" className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <Search className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </form>
+          )}
+          
           <div className="flex flex-col space-y-2">
-            <Button variant="ghost" className="justify-start" asChild>
-              <Link to="/">Início</Link>
-            </Button>
+            {!isAdmin && (
+              <Button variant="ghost" className="justify-start" asChild>
+                <Link to="/">Início</Link>
+              </Button>
+            )}
+            
             {user && !isAdmin && (
               <>
                 <Button variant="ghost" className="justify-start" onClick={handleTrashClick}>
