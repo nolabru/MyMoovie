@@ -34,46 +34,70 @@ const TitlesContext = createContext<TitlesContextType | undefined>(undefined);
 export const TitlesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [titles, setTitles] = useState<Title[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lastFetched, setLastFetched] = useState<number | null>(null);
+  const [requestInProgress, setRequestInProgress] = useState(false);
   const { user } = useAuth();
+
+  // Função para buscar títulos com debounce
+  const fetchTitles = async () => {
+    // Evita requisições simultâneas
+    if (requestInProgress) return;
+    
+    // Se já buscou dados nos últimos 2 segundos, ignora
+    const now = Date.now();
+    if (lastFetched && now - lastFetched < 2000) return;
+    
+    if (!user) {
+      setTitles([]);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setRequestInProgress(true);
+      setLoading(true);
+      
+      const { data, error } = await supabase
+        .from('titles')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      // Converter os dados recebidos para o tipo Title
+      const typedData = data?.map(item => ({
+        ...item,
+        type: item.type as TitleType,
+        category: item.category as CategoryType,
+        image: item.image || ''
+      })) || [];
+      
+      setTitles(typedData);
+      setLastFetched(now);
+    } catch (error: any) {
+      console.error('Erro ao carregar títulos:', error.message);
+      toast.error('Erro ao carregar títulos');
+    } finally {
+      setLoading(false);
+      setRequestInProgress(false);
+    }
+  };
 
   // Carregar títulos do usuário atual
   useEffect(() => {
-    const fetchTitles = async () => {
-      if (!user) {
-        setTitles([]);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('titles')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        
-        // Converter os dados recebidos para o tipo Title
-        const typedData = data?.map(item => ({
-          ...item,
-          type: item.type as TitleType,
-          category: item.category as CategoryType,
-          image: item.image || ''
-        })) || [];
-        
-        setTitles(typedData);
-      } catch (error: any) {
-        console.error('Erro ao carregar títulos:', error.message);
-        toast.error('Erro ao carregar títulos');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTitles();
-  }, [user]);
+    // Reset states on auth change
+    setTitles([]);
+    setLoading(true);
+    setLastFetched(null);
+    
+    // Fetch titles if user exists
+    if (user) {
+      fetchTitles();
+    } else {
+      setLoading(false);
+    }
+  }, [user?.id]); // Só executa quando o ID do usuário muda
 
   // Upload de imagem
   const uploadImage = async (file: File): Promise<string> => {
