@@ -65,44 +65,6 @@ const Navbar: React.FC<NavbarProps> = ({
 
         {/* Desktop navigation - combinando barra de pesquisa e botões em uma única div */}
         <div className="hidden md:flex items-center justify-end flex-1 gap-4">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Avatar>
-                  <AvatarFallback>{getUserInitials()}</AvatarFallback>
-                </Avatar>
-              </Button>
-            </SheetTrigger>
-            <SheetContent className="w-[250px] sm:w-[300px]">
-              <div className="flex flex-col h-full">
-                <div className="flex-1">
-                  <div className="py-4 flex items-center">
-                    <Avatar className="h-12 w-12">
-                      <AvatarFallback>{getUserInitials()}</AvatarFallback>
-                    </Avatar>
-                    <div className="ml-4">
-                      <h2 className="font-medium">{getUserName()}</h2>
-                      <p className="text-sm text-muted-foreground">{isAdmin ? 'Administrador' : 'Usuário'}</p>
-                    </div>
-                  </div>
-                  
-                  {isAdmin && <div className="py-2">
-                      <Button variant="outline" className="w-full justify-start" asChild>
-                        <Link to="/admin">
-                          <Settings className="h-4 w-4 mr-2" />
-                          Painel de Administração
-                        </Link>
-                      </Button>
-                    </div>}
-                </div>
-                
-                <Button variant="outline" className="mt-auto" onClick={handleSignOut}>
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Sair
-                </Button>
-              </div>
-            </SheetContent>
-          </Sheet>
 
           <form onSubmit={handleSearch} className="flex max-w-xl">
             <div className="relative w-full">
@@ -171,6 +133,44 @@ const Navbar: React.FC<NavbarProps> = ({
               </div>
             </div>
           </div>
+                  <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <Avatar>
+                  <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                </Avatar>
+              </Button>
+            </SheetTrigger>
+            <SheetContent className="w-[250px] sm:w-[300px]">
+              <div className="flex flex-col h-full">
+                <div className="flex-1">
+                  <div className="py-4 flex items-center">
+                    <Avatar className="h-12 w-12">
+                      <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                    </Avatar>
+                    <div className="ml-4">
+                      <h2 className="font-medium">{getUserName()}</h2>
+                      <p className="text-sm text-muted-foreground">{isAdmin ? 'Administrador' : 'Usuário'}</p>
+                    </div>
+                  </div>
+                  
+                  {isAdmin && <div className="py-2">
+                      <Button variant="outline" className="w-full justify-start" asChild>
+                        <Link to="/admin">
+                          <Settings className="h-4 w-4 mr-2" />
+                          Painel de Administração
+                        </Link>
+                      </Button>
+                    </div>}
+                </div>
+                
+                <Button variant="outline" className="mt-auto" onClick={handleSignOut}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sair
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>}
     </nav>;
 };
