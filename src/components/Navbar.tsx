@@ -65,6 +65,13 @@ const Navbar: React.FC<NavbarProps> = ({
 
         {/* Desktop navigation - Reorganized to put profile button before search */}
         <div className="hidden md:flex items-center gap-4">
+           {/* Search form - now after profile button with increased width */}
+          <form onSubmit={handleSearch} className="flex flex-1 max-w-xl">
+            <div className="relative w-full">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input type="search" placeholder="Buscar..." className="w-full pl-8" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+            </div>
+          </form>
           {isAdmin && <Button variant="outline" size="sm" asChild>
               <Link to="/admin">
                 <Settings className="h-4 w-4 mr-2" />
@@ -87,13 +94,6 @@ const Navbar: React.FC<NavbarProps> = ({
           
           {/* Profile button - now before search */}
              
-          {/* Search form - now after profile button with increased width */}
-          <form onSubmit={handleSearch} className="flex flex-1 max-w-xl">
-            <div className="relative w-full">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input type="search" placeholder="Buscar..." className="w-full pl-8" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-            </div>
-          </form>
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">
