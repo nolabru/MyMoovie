@@ -47,11 +47,11 @@ const App = () => {
           <TitlesProvider>
             <BrowserRouter>
               <Routes>
-                {/* Entry point - handles redirection based on auth state */}
-                <Route path="/index" element={<Index />} />
+                {/* Root path redirects based on auth state */}
+                <Route path="/" element={<Index />} />
                 
-                {/* Main page - Only accessible when logged in */}
-                <Route path="/" element={
+                {/* Dashboard - Only accessible when logged in */}
+                <Route path="/home" element={
                   <ProtectedRoute>
                     <>
                       <Navbar onSearch={setSearchQuery} />
@@ -60,12 +60,9 @@ const App = () => {
                   </ProtectedRoute>
                 } />
                 
-                {/* Redirect /home to main page / */}
-                <Route path="/home" element={<Navigate to="/" replace />} />
-                
                 {/* Splash screen as presentation route */}
                 <Route path="/apresentacao" element={
-                  <PublicOnlyRoute redirectTo="/">
+                  <PublicOnlyRoute>
                     <SplashScreen />
                   </PublicOnlyRoute>
                 } />
@@ -105,8 +102,12 @@ const App = () => {
                 />
                 <Route path="/login" element={<Auth />} />
                 
-                {/* Catch all and redirect to entry point */}
-                <Route path="*" element={<Navigate to="/index" replace />} />
+                {/* Catch all unknown routes and ensure they redirect to login if unauthenticated */}
+                <Route path="*" element={
+                  <ProtectedRoute>
+                    <NotFound />
+                  </ProtectedRoute>
+                } />
               </Routes>
               <Sonner />
               <Toaster />
