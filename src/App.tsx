@@ -47,8 +47,11 @@ const App = () => {
           <TitlesProvider>
             <BrowserRouter>
               <Routes>
-                {/* Root path shows Home for authenticated users, otherwise redirects to presentation */}
-                <Route path="/" element={
+                {/* Root path redirects based on auth state */}
+                <Route path="/" element={<Index />} />
+                
+                {/* Dashboard - Only accessible when logged in */}
+                <Route path="/home" element={
                   <ProtectedRoute>
                     <>
                       <Navbar onSearch={setSearchQuery} />
@@ -98,9 +101,6 @@ const App = () => {
                   }
                 />
                 <Route path="/login" element={<Auth />} />
-                
-                {/* Redirect /home to root path */}
-                <Route path="/home" element={<Navigate to="/" replace />} />
                 
                 {/* Catch all unknown routes and ensure they redirect to login if unauthenticated */}
                 <Route path="*" element={
