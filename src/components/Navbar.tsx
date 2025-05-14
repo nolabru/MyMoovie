@@ -8,11 +8,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ThemeToggle from "./ThemeToggle";
 import Logo from "./Logo";
-
 interface NavbarProps {
   onSearch: (query: string) => void;
 }
-
 const Navbar: React.FC<NavbarProps> = ({
   onSearch
 }) => {
@@ -24,22 +22,19 @@ const Navbar: React.FC<NavbarProps> = ({
     isAdmin
   } = useAuth();
   const navigate = useNavigate();
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     onSearch(searchQuery);
   };
-
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
-  
+
   // Melhorado para não navegar imediatamente após o logout
   const handleSignOut = async () => {
     try {
       console.log("Starting logout process");
       await signOut();
-      
       console.log("Logout successful - navigation will happen via auth state change");
       // Não navegamos manualmente - deixamos o sistema de redirecionamento baseado
       // nas alterações de estado de autenticação fazer isso por nós.
@@ -47,7 +42,6 @@ const Navbar: React.FC<NavbarProps> = ({
       console.error("Error during logout:", error);
     }
   };
-
   const getUserInitials = () => {
     if (!user || !user.email) return "U";
     return user.email.charAt(0).toUpperCase();
@@ -58,10 +52,9 @@ const Navbar: React.FC<NavbarProps> = ({
     if (!user || !user.email) return "Usuário";
     return user.email.split('@')[0];
   };
-
   return <nav className="border-b sticky top-0 bg-background z-50">
       <div className="container mx-auto px-2 flex items-center justify-between">
-        <div className="flex items-center w-full justify-between">
+        <div className="flex items-center">
           <Link to="/" className="font-bold text-xl py-4 flex items-center">
             <Logo />
           </Link>
@@ -182,5 +175,4 @@ const Navbar: React.FC<NavbarProps> = ({
         </div>}
     </nav>;
 };
-
 export default Navbar;
