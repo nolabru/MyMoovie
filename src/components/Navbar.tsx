@@ -71,9 +71,8 @@ const Navbar: React.FC<NavbarProps> = ({
                 <Avatar className="h-8 w-8">
                   <AvatarFallback>{getUserInitials()}</AvatarFallback>
                 </Avatar>
-                <Button variant="outline" onClick={handleSignOut}>
-                  <LogOut className="h-4 w-4 mr-1" />
-                  Sair
+                <Button variant="ghost" size="icon" onClick={handleSignOut}>
+                  <LogOut className="h-4 w-4" />
                 </Button>
               </div>
             )}
@@ -109,14 +108,12 @@ const Navbar: React.FC<NavbarProps> = ({
           {/* Botões de lixeira e adicionar título - apenas para usuários comuns autenticados */}
           {user && !isAdmin && (
             <div className="hidden md:flex gap-2">
-              <Button variant="outline" onClick={handleTrashClick} size="sm">
-                <Trash className="h-4 w-4 mr-1" />
-                Lixeira
+              <Button variant="ghost" size="icon" onClick={handleTrashClick} title="Lixeira">
+                <Trash className="h-4 w-4" />
               </Button>
               
-              <Button onClick={handleAddTitle} size="sm">
-                <Plus className="h-4 w-4 mr-1" />
-                Adicionar
+              <Button variant="ghost" size="icon" onClick={handleAddTitle} title="Adicionar Título">
+                <Plus className="h-4 w-4" />
               </Button>
             </div>
           )}
@@ -127,10 +124,9 @@ const Navbar: React.FC<NavbarProps> = ({
             {user && (
               <>
                 {isAdmin && (
-                  <Button variant="ghost" asChild>
-                    <Link to="/admin">
-                      <Shield className="h-4 w-4 mr-1" />
-                      Admin
+                  <Button variant="ghost" size="icon" asChild>
+                    <Link to="/admin" title="Painel Admin">
+                      <Shield className="h-4 w-4" />
                     </Link>
                   </Button>
                 )}
@@ -139,19 +135,17 @@ const Navbar: React.FC<NavbarProps> = ({
                   <Avatar className="h-8 w-8">
                     <AvatarFallback>{getUserInitials()}</AvatarFallback>
                   </Avatar>
-                  <Button variant="outline" onClick={handleSignOut}>
-                    <LogOut className="h-4 w-4 mr-1" />
-                    Sair
+                  <Button variant="ghost" size="icon" onClick={handleSignOut} title="Sair">
+                    <LogOut className="h-4 w-4" />
                   </Button>
                 </div>
               </>
             )}
 
             {!user && (
-              <Button variant="outline" asChild>
-                <Link to="/login">
-                  <User className="h-4 w-4 mr-1" />
-                  Entrar
+              <Button variant="ghost" size="icon" asChild>
+                <Link to="/login" title="Entrar">
+                  <User className="h-4 w-4" />
                 </Link>
               </Button>
             )}
