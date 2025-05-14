@@ -23,35 +23,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    console.log("AuthProvider: Initializing auth state");
-    
-    // Set up auth state listener FIRST
+    // Verificar sessão atual
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        checkIsAdmin(session.user.id);
+      }
+      
+      setLoading(false);
+    });
+
+    // Configurar listener para mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, newSession) => {
-        console.log("Auth state changed:", event, newSession?.user?.email);
-        setSession(newSession);
-        setUser(newSession?.user ?? null);
+      (_, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
         
-        if (newSession?.user) {
-          checkIsAdmin(newSession.user.id);
+        if (session?.user) {
+          checkIsAdmin(session.user.id);
         } else {
           setIsAdmin(false);
         }
       }
     );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      console.log("AuthProvider: Got initial session", currentSession?.user?.email);
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      
-      if (currentSession?.user) {
-        checkIsAdmin(currentSession.user.id);
-      }
-      
-      setLoading(false);
-    });
 
     return () => subscription.unsubscribe();
   }, []);
@@ -111,35 +107,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Função para logout - melhorada para garantir limpeza correta do estado
+  // Função para logout
   const signOut = async () => {
     try {
-      console.log("Starting logout process for user:", user?.email);
-      
-      // Clear local state FIRST to prevent redirection loops
-      setUser(null);
-      setSession(null);
-      setIsAdmin(false);
-      
-      // Then attempt to sign out from Supabase
       const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        // If the error is "Session not found", we can ignore it since we've already cleared local state
-        if (!error.message.includes("Session not found")) {
-          throw error;
-        } else {
-          console.log("Session not found, but continuing with local logout");
-        }
-      }
-      
-      // Confirm logout success
-      console.log("Logout completed successfully");
+      if (error) throw error;
       toast.success("Logout realizado com sucesso!");
     } catch (error: any) {
       toast.error(error.message || "Erro ao fazer logout");
-      console.error("Logout error:", error);
-      // Even with an error, we ensure local state is cleared
+      throw error;
     }
   };
 

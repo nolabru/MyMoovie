@@ -1,6 +1,6 @@
 
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface PublicOnlyRouteProps {
@@ -10,46 +10,16 @@ interface PublicOnlyRouteProps {
 
 const PublicOnlyRoute: React.FC<PublicOnlyRouteProps> = ({ 
   children, 
-  redirectTo = "/home" 
+  redirectTo = "/" 
 }) => {
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
-  const [hasRedirected, setHasRedirected] = useState(false);
+  const { user } = useAuth();
   
-  useEffect(() => {
-    // Only redirect when loading is complete, user is authenticated, and we haven't redirected yet
-    if (!loading && user && !hasRedirected) {
-      console.log("PublicOnlyRoute: User is authenticated, redirecting to", redirectTo);
-      
-      // Set the flag to prevent multiple redirects
-      setHasRedirected(true);
-      
-      // Use a short timeout to ensure state is fully updated before navigation
-      setTimeout(() => {
-        navigate(redirectTo, { replace: true });
-      }, 10);
-    }
-  }, [user, loading, navigate, redirectTo, hasRedirected]);
-  
-  // If still loading, show loading state
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-muted-foreground">Carregando...</p>
-      </div>
-    );
+  // If the user is logged in, redirect to the specified route
+  if (user) {
+    return <Navigate to={redirectTo} replace />;
   }
   
-  // If user is authenticated but we haven't redirected yet, show loading
-  if (user && !hasRedirected) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-muted-foreground">Redirecionando...</p>
-      </div>
-    );
-  }
-  
-  // User is not authenticated, render the children (splash screen)
+  // Otherwise, render the children (splash screen)
   return <>{children}</>;
 };
 

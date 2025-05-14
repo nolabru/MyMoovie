@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -18,10 +18,26 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import PublicOnlyRoute from "./components/PublicOnlyRoute";
 import AdminRoute from "./components/AdminRoute";
+import { useAuth } from "./contexts/AuthContext";
 import Index from "./pages/Index";
-import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
+
+// Improved component for protected routes
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  
+  // If still loading auth state, show nothing to prevent flash
+  if (loading) return null;
+  
+  // If no user is logged in, redirect to presentation page
+  if (!user) {
+    return <Navigate to="/apresentacao" replace />;
+  }
+  
+  // User is authenticated, show the protected content
+  return <>{children}</>;
+};
 
 const App = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,41 +49,32 @@ const App = () => {
           <TitlesProvider>
             <BrowserRouter>
               <Routes>
-                {/* Root path handles redirection based on auth state */}
+                {/* Root path redirects based on auth state */}
                 <Route path="/" element={<Index />} />
                 
-                {/* Presentation route - only for unauthenticated users */}
-                <Route 
-                  path="/apresentacao" 
-                  element={
-                    <PublicOnlyRoute>
-                      <SplashScreen />
-                    </PublicOnlyRoute>
-                  } 
-                />
+                {/* Dashboard - Only accessible when logged in */}
+                <Route path="/home" element={
+                  <ProtectedRoute>
+                    <>
+                      <Navbar onSearch={setSearchQuery} />
+                      <Home searchQuery={searchQuery} />
+                    </>
+                  </ProtectedRoute>
+                } />
                 
-                {/* Authentication route - only for unauthenticated users */}
-                <Route 
-                  path="/login" 
-                  element={
-                    <PublicOnlyRoute>
-                      <Auth />
-                    </PublicOnlyRoute>
-                  } 
-                />
+                {/* Admin Dashboard - Only accessible for admin users */}
+                <Route path="/admin" element={
+                  <AdminRoute>
+                    <AdminDashboard />
+                  </AdminRoute>
+                } />
                 
-                {/* Protected routes */}
-                <Route
-                  path="/home"
-                  element={
-                    <ProtectedRoute>
-                      <>
-                        <Navbar onSearch={setSearchQuery} />
-                        <Home searchQuery={searchQuery} />
-                      </>
-                    </ProtectedRoute>
-                  }
-                />
+                {/* Splash screen as presentation route */}
+                <Route path="/apresentacao" element={
+                  <PublicOnlyRoute>
+                    <SplashScreen />
+                  </PublicOnlyRoute>
+                } />
                 
                 <Route
                   path="/adicionar"
@@ -80,7 +87,6 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 />
-                
                 <Route
                   path="/editar/:id"
                   element={
@@ -92,7 +98,6 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 />
-                
                 <Route
                   path="/lixeira"
                   element={
@@ -104,19 +109,14 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 />
+                <Route path="/login" element={<Auth />} />
                 
-                {/* Admin route */}
-                <Route 
-                  path="/admin" 
-                  element={
-                    <AdminRoute>
-                      <AdminDashboard />
-                    </AdminRoute>
-                  } 
-                />
-                
-                {/* Catch all unknown routes */}
-                <Route path="*" element={<NotFound />} />
+                {/* Catch all unknown routes and ensure they redirect to login if unauthenticated */}
+                <Route path="*" element={
+                  <ProtectedRoute>
+                    <NotFound />
+                  </ProtectedRoute>
+                } />
               </Routes>
               <Sonner />
               <Toaster />
