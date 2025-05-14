@@ -20,6 +20,7 @@ const AdminSidebar = () => {
     <aside className="w-64 min-h-screen bg-card border-r flex flex-col">
       <div className="p-4 border-b">
         <Logo />
+        <h2 className="text-xl font-bold mt-2">Painel Admin</h2>
       </div>
       
       <nav className="flex-1 p-4 space-y-2">
