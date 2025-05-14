@@ -40,9 +40,7 @@ const Navbar = ({
       <div className="flex h-16 items-center px-4 container mx-auto">
         <div className="flex items-center gap-2">
           <Logo />
-          <span className="sr-only md:not-sr-only md:text-xl font-semibold">
-            MediaFlow
-          </span>
+          
         </div>
 
         <div className="flex items-center ml-auto gap-2">
