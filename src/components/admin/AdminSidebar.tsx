@@ -1,23 +1,26 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { BarChart, FolderKanban, Film, Users, LogOut } from "lucide-react";
+import { BarChart, FolderKanban, Film, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
 import Logo from "@/components/Logo";
+
 const AdminSidebar = () => {
   const {
     signOut
   } = useAuth();
   const navigate = useNavigate();
+  
   const handleSignOut = async () => {
     await signOut();
     navigate("/login");
   };
+  
   return <aside className="w-64 min-h-screen bg-card border-r flex flex-col">
-      <div className="px-4 py-0 border-b">
+      <div className="py-0 border-b">
         <Logo />
-        
       </div>
       
       <nav className="flex-1 p-4 space-y-2">
@@ -32,10 +35,6 @@ const AdminSidebar = () => {
         <div className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted">
           <Film size={20} />
           <span>Tipos</span>
-        </div>
-        <div className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted">
-          <Users size={20} />
-          <span>Usuários</span>
         </div>
       </nav>
       
@@ -52,4 +51,5 @@ const AdminSidebar = () => {
       </div>
     </aside>;
 };
+
 export default AdminSidebar;
