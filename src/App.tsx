@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
@@ -20,22 +19,29 @@ import PublicOnlyRoute from "./components/PublicOnlyRoute";
 import AdminRoute from "./components/AdminRoute";
 import { useAuth } from "./contexts/AuthContext";
 import Index from "./pages/Index";
+import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
 
-// Improved component for protected routes
+// Componente melhorado para rotas protegidas com tratamento de loading
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
-  // If still loading auth state, show nothing to prevent flash
-  if (loading) return null;
+  // Se ainda estiver carregando o estado de autenticação, mostrar indicador de carregamento
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
   
-  // If no user is logged in, redirect to presentation page
+  // Se nenhum usuário estiver logado, redirecionar para a página de apresentação
   if (!user) {
     return <Navigate to="/apresentacao" replace />;
   }
   
-  // User is authenticated, show the protected content
+  // Usuário está autenticado, mostrar o conteúdo protegido
   return <>{children}</>;
 };
 
@@ -49,10 +55,10 @@ const App = () => {
           <TitlesProvider>
             <BrowserRouter>
               <Routes>
-                {/* Root path redirects based on auth state */}
+                {/* Rota raiz redireciona com base no estado de autenticação */}
                 <Route path="/" element={<Index />} />
                 
-                {/* Dashboard - Only accessible when logged in */}
+                {/* Dashboard - Acessível apenas quando logado */}
                 <Route path="/home" element={
                   <ProtectedRoute>
                     <>
@@ -62,7 +68,7 @@ const App = () => {
                   </ProtectedRoute>
                 } />
                 
-                {/* Admin Panel - Only accessible with admin email */}
+                {/* Painel Admin - Acessível apenas com email admin */}
                 <Route path="/admin/categorias" element={
                   <AdminRoute>
                     <>
@@ -72,7 +78,7 @@ const App = () => {
                   </AdminRoute>
                 } />
                 
-                {/* Splash screen as presentation route */}
+                {/* Tela inicial como rota de apresentação pública */}
                 <Route path="/apresentacao" element={
                   <PublicOnlyRoute>
                     <SplashScreen />
@@ -114,7 +120,8 @@ const App = () => {
                 />
                 <Route path="/login" element={<Auth />} />
                 
-                {/* Catch all unknown routes and ensure they redirect to login if unauthenticated */}
+                {/* Captura todas as rotas desconhecidas e garante redirecionamento 
+                   para login se não autenticado */}
                 <Route path="*" element={
                   <ProtectedRoute>
                     <NotFound />
