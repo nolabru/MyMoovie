@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,6 +9,7 @@ import CategoriesList from "@/components/admin/CategoriesList";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield } from "lucide-react";
+
 const Admin: React.FC = () => {
   const {
     user,
@@ -17,6 +19,7 @@ const Admin: React.FC = () => {
   } = useAuth();
   const navigate = useNavigate();
   const [adminLoading, setAdminLoading] = useState<boolean>(true);
+
   useEffect(() => {
     const verifyAccess = async () => {
       if (!user) {
@@ -44,23 +47,24 @@ const Admin: React.FC = () => {
       navigate("/login");
     }
   }, [user, loading, navigate, checkAdminStatus]);
+
   if (loading || adminLoading) {
     return <div className="flex items-center justify-center min-h-screen">
         <div className="animate-pulse text-lg">Carregando...</div>
       </div>;
   }
+
   if (!isAdmin) {
     return null; // Evita renderização durante redirecionamento
   }
+
   return <>
-      <Navbar onSearch={() => {}} />
+      <Navbar onSearch={() => {}} adminOnly={true} />
       <div className="container py-8">
         <div className="flex items-center gap-2 mb-6">
           <Shield className="h-6 w-6 text-primary" />
           <h1 className="text-2xl font-bold">Painel Administrativo</h1>
         </div>
-
-        
 
         <Tabs defaultValue="listar" className="w-full">
           <TabsList className="mb-6">
@@ -79,4 +83,5 @@ const Admin: React.FC = () => {
       </div>
     </>;
 };
+
 export default Admin;
