@@ -39,6 +39,23 @@ const CategoryForm: React.FC = () => {
     try {
       setLoading(true);
       
+      // Verificar se a categoria já existe
+      const { data: existingCategory, error: checkError } = await supabase
+        .from("categories")
+        .select("name")
+        .eq("name", values.name.trim())
+        .maybeSingle();
+        
+      if (checkError) {
+        throw checkError;
+      }
+      
+      if (existingCategory) {
+        toast.error("Esta categoria já existe");
+        return;
+      }
+      
+      // Inserir nova categoria
       const { error } = await supabase.from("categories").insert({
         name: values.name.trim(),
       });
@@ -62,7 +79,7 @@ const CategoryForm: React.FC = () => {
       <CardHeader>
         <CardTitle>Cadastrar Nova Categoria</CardTitle>
         <CardDescription>
-          Adicione uma nova categoria ao sistema
+          Adicione uma nova categoria ao sistema. Usuários poderão classificar seus títulos com esta categoria.
         </CardDescription>
       </CardHeader>
       <CardContent>

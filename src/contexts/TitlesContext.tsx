@@ -27,6 +27,7 @@ interface TitlesContextType {
   restoreTitle: (id: string) => Promise<void>;
   permanentlyDeleteTitle: (id: string) => Promise<void>;
   getTitleById: (id: string) => Title | undefined;
+  syncTitlesWithCategories: () => Promise<void>;
 }
 
 const TitlesContext = createContext<TitlesContextType | undefined>(undefined);
@@ -93,6 +94,84 @@ export const TitlesProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     
     return urlData.publicUrl;
   };
+
+  // Sincronizar títulos com categorias (para atualização automática quando categorias forem editadas)
+  const syncTitlesWithCategories = async () => {
+    if (!user) return;
+
+    try {
+      // Fetch valid categories from database
+      const { data: validCategories, error: categoriesError } = await supabase
+        .from('categories')
+        .select('name');
+
+      if (categoriesError) throw categoriesError;
+      
+      // Create a set of valid category names
+      const validCategoryNames = new Set(validCategories.map(c => c.name));
+      
+      // Find titles with categories that no longer exist
+      const titlesToUpdate = titles.filter(
+        title => !validCategoryNames.has(title.category) && !title.deleted
+      );
+      
+      if (titlesToUpdate.length === 0) return;
+      
+      // If there are invalid categories, update them to the first available category or 'assistir' as fallback
+      const defaultCategory = validCategoryNames.size > 0 
+        ? validCategories[0].name 
+        : 'assistir';
+        
+      // Update each title with invalid category
+      for (const title of titlesToUpdate) {
+        await supabase
+          .from('titles')
+          .update({ category: defaultCategory })
+          .eq('id', title.id)
+          .eq('user_id', user.id);
+      }
+      
+      // Update local state
+      setTitles(prevTitles => 
+        prevTitles.map(title => 
+          titlesToUpdate.some(t => t.id === title.id) 
+            ? { ...title, category: defaultCategory as CategoryType } 
+            : title
+        )
+      );
+      
+      // Notify user if titles were updated
+      if (titlesToUpdate.length > 0) {
+        toast.info(`${titlesToUpdate.length} título(s) atualizados devido a mudanças nas categorias disponíveis.`);
+      }
+      
+    } catch (error: any) {
+      console.error('Erro ao sincronizar títulos com categorias:', error.message);
+    }
+  };
+  
+  // Listen for category changes
+  useEffect(() => {
+    if (!user) return;
+    
+    const channel = supabase
+      .channel('categories-changes')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'categories' 
+      }, () => {
+        syncTitlesWithCategories();
+      })
+      .subscribe();
+    
+    // Initial sync
+    syncTitlesWithCategories();
+    
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, titles.length]);
 
   // Adicionar título
   const addTitle = async (title: Omit<Title, "id" | "deleted" | "user_id">, imageFile?: File) => {
@@ -259,6 +338,7 @@ export const TitlesProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         restoreTitle,
         permanentlyDeleteTitle,
         getTitleById,
+        syncTitlesWithCategories,
       }}
     >
       {children}

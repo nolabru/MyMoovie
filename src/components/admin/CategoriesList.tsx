@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Edit, Trash } from "lucide-react";
+import { Edit, Trash, Info } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 type Category = {
   id: string;
@@ -22,6 +23,8 @@ const CategoriesList: React.FC = () => {
   const [categoryName, setCategoryName] = useState<string>("");
   const [openEditDialog, setOpenEditDialog] = useState<boolean>(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
+  const [titleCount, setTitleCount] = useState<number>(0);
+  const [showInfoDialog, setShowInfoDialog] = useState<boolean>(false);
 
   const fetchCategories = async () => {
     try {
@@ -54,15 +57,49 @@ const CategoriesList: React.FC = () => {
     setOpenEditDialog(true);
   };
 
-  const handleDeleteClick = (category: Category) => {
+  const handleDeleteClick = async (category: Category) => {
     setEditingCategory(category);
-    setOpenDeleteDialog(true);
+    
+    // Check if any titles are using this category
+    try {
+      const { count, error } = await supabase
+        .from("titles")
+        .select("*", { count: 'exact', head: true })
+        .eq("category", category.name);
+        
+      if (error) throw error;
+      
+      setTitleCount(count || 0);
+      setOpenDeleteDialog(true);
+    } catch (error: any) {
+      console.error("Erro ao verificar uso da categoria:", error.message);
+      toast.error("Erro ao verificar uso da categoria");
+    }
   };
 
   const updateCategory = async () => {
     if (!editingCategory || !categoryName.trim()) return;
-
+    
     try {
+      // Check for duplicate
+      const { data: existingCategory, error: checkError } = await supabase
+        .from("categories")
+        .select("name")
+        .eq("name", categoryName.trim())
+        .neq("id", editingCategory.id)
+        .maybeSingle();
+        
+      if (checkError) throw checkError;
+      
+      if (existingCategory) {
+        toast.error("Já existe uma categoria com este nome");
+        return;
+      }
+      
+      // Store the old category name before updating
+      const oldCategoryName = editingCategory.name;
+      
+      // Update category
       const { error } = await supabase
         .from("categories")
         .update({ name: categoryName.trim(), updated_at: new Date().toISOString() })
@@ -70,6 +107,16 @@ const CategoriesList: React.FC = () => {
 
       if (error) {
         throw error;
+      }
+      
+      // Update all titles with this category
+      const { error: updateTitlesError } = await supabase
+        .from("titles")
+        .update({ category: categoryName.trim() })
+        .eq("category", oldCategoryName);
+        
+      if (updateTitlesError) {
+        console.error("Erro ao atualizar títulos:", updateTitlesError.message);
       }
 
       toast.success("Categoria atualizada com sucesso");
@@ -85,6 +132,7 @@ const CategoriesList: React.FC = () => {
     if (!editingCategory) return;
 
     try {
+      // Delete the category
       const { error } = await supabase
         .from("categories")
         .delete()
@@ -92,6 +140,31 @@ const CategoriesList: React.FC = () => {
 
       if (error) {
         throw error;
+      }
+      
+      // If there are titles using this category, update them
+      if (titleCount > 0) {
+        // Get first available category or use 'assistir' as fallback
+        let defaultCategory = 'assistir';
+        if (categories.length > 1) {
+          const alternativeCategory = categories.find(c => c.id !== editingCategory.id);
+          if (alternativeCategory) {
+            defaultCategory = alternativeCategory.name;
+          }
+        }
+        
+        // Update all titles with the deleted category
+        const { error: updateTitlesError } = await supabase
+          .from("titles")
+          .update({ category: defaultCategory })
+          .eq("category", editingCategory.name);
+          
+        if (updateTitlesError) {
+          console.error("Erro ao atualizar títulos:", updateTitlesError.message);
+          toast.error("Erro ao atualizar títulos afetados");
+        } else {
+          setShowInfoDialog(true);
+        }
       }
 
       toast.success("Categoria excluída com sucesso");
@@ -190,8 +263,21 @@ const CategoriesList: React.FC = () => {
             <DialogTitle>Confirmar Exclusão</DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            Tem certeza que deseja excluir a categoria "{editingCategory?.name}"?
-            Esta ação não pode ser desfeita.
+            <p>
+              Tem certeza que deseja excluir a categoria "{editingCategory?.name}"?
+            </p>
+            {titleCount > 0 && (
+              <div className="mt-4 p-4 bg-yellow-50 text-yellow-800 rounded-md">
+                <div className="flex items-center">
+                  <Info className="h-5 w-5 mr-2" />
+                  <p className="font-medium">Atenção!</p>
+                </div>
+                <p className="mt-1">
+                  Esta categoria está sendo usada em {titleCount} título(s). 
+                  Se você excluí-la, esses títulos serão reclassificados para outra categoria disponível.
+                </p>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpenDeleteDialog(false)}>
@@ -203,6 +289,22 @@ const CategoriesList: React.FC = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      {/* Diálogo de Informação pós-exclusão */}
+      <AlertDialog open={showInfoDialog} onOpenChange={setShowInfoDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Categoria excluída</AlertDialogTitle>
+            <AlertDialogDescription>
+              {titleCount} título(s) foram atualizados para usar uma categoria diferente.
+              Os usuários serão notificados sobre essa alteração quando acessarem seus títulos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction>Entendi</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
