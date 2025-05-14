@@ -5,7 +5,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import CategoriesManager from "@/components/admin/CategoriesManager";
 import TypesManager from "@/components/admin/TypesManager";
-import UsersManager from "@/components/admin/UsersManager";
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -20,19 +19,15 @@ const AdminDashboard = () => {
         </p>
 
         <Tabs defaultValue="categories" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="categories">Categorias</TabsTrigger>
             <TabsTrigger value="types">Tipos</TabsTrigger>
-            <TabsTrigger value="users">Usuários</TabsTrigger>
           </TabsList>
           <TabsContent value="categories">
             <CategoriesManager />
           </TabsContent>
           <TabsContent value="types">
             <TypesManager />
-          </TabsContent>
-          <TabsContent value="users">
-            <UsersManager />
           </TabsContent>
         </Tabs>
       </div>
