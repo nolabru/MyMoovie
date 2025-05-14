@@ -8,7 +8,6 @@ import Logo from "./Logo";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import ThemeToggle from "./ThemeToggle";
-import { supabase } from "@/integrations/supabase/client";
 
 interface NavbarProps {
   onSearch: (query: string) => void;
@@ -74,7 +73,7 @@ const Navbar: React.FC<NavbarProps> = ({
     <nav className="border-b sticky top-0 bg-background z-50">
       <div className="container mx-auto px-2 flex items-center justify-between">
         <div className="flex items-center">
-          <Link to="/home" className="mr-6">
+          <Link to="/" className="mr-6">
             <Logo />
           </Link>
         </div>

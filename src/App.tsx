@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-import Home from "./pages/Home";
+import Index from "./pages/Index";
 import TitleForm from "./pages/TitleForm";
 import Auth from "./pages/Auth";
 import TrashPage from "./pages/Trash";
@@ -18,7 +18,6 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import PublicOnlyRoute from "./components/PublicOnlyRoute";
 import { useAuth } from "./contexts/AuthContext";
-import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
 
@@ -39,8 +38,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
@@ -48,20 +45,10 @@ const App = () => {
           <TitlesProvider>
             <BrowserRouter>
               <Routes>
-                {/* Root path redirects based on auth state */}
+                {/* Root path agora tem o conteúdo que estava em /home */}
                 <Route path="/" element={<Index />} />
                 
-                {/* Dashboard - Only accessible when logged in */}
-                <Route path="/home" element={
-                  <ProtectedRoute>
-                    <>
-                      <Navbar onSearch={setSearchQuery} />
-                      <Home searchQuery={searchQuery} />
-                    </>
-                  </ProtectedRoute>
-                } />
-                
-                {/* Splash screen as presentation route */}
+                {/* Splash screen como rota de apresentação */}
                 <Route path="/apresentacao" element={
                   <PublicOnlyRoute>
                     <SplashScreen />
@@ -73,7 +60,7 @@ const App = () => {
                   element={
                     <ProtectedRoute>
                       <>
-                        <Navbar onSearch={setSearchQuery} />
+                        <Navbar onSearch={() => {}} />
                         <TitleForm />
                       </>
                     </ProtectedRoute>
@@ -84,7 +71,7 @@ const App = () => {
                   element={
                     <ProtectedRoute>
                       <>
-                        <Navbar onSearch={setSearchQuery} />
+                        <Navbar onSearch={() => {}} />
                         <TitleForm />
                       </>
                     </ProtectedRoute>
@@ -95,7 +82,7 @@ const App = () => {
                   element={
                     <ProtectedRoute>
                       <>
-                        <Navbar onSearch={setSearchQuery} />
+                        <Navbar onSearch={() => {}} />
                         <TrashPage />
                       </>
                     </ProtectedRoute>
@@ -113,7 +100,7 @@ const App = () => {
                   }
                 />
                 
-                {/* Catch all unknown routes and ensure they redirect to login if unauthenticated */}
+                {/* Capturar todas as rotas desconhecidas */}
                 <Route path="*" element={
                   <ProtectedRoute>
                     <NotFound />
