@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Menu, User, Plus, Trash, LogOut, Settings } from "lucide-react";
@@ -7,6 +8,7 @@ import { SheetTrigger, SheetContent, Sheet } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ThemeToggle from "./ThemeToggle";
+import Logo from "./Logo";
 
 interface NavbarProps {
   onSearch: (query: string) => void;
@@ -53,8 +55,7 @@ const Navbar: React.FC<NavbarProps> = ({
       <div className="container mx-auto px-2 flex items-center justify-between">
         <div className="flex items-center">
           <Link to="/" className="font-bold text-xl py-4 flex items-center">
-            <span className="text-primary mr-2">My</span>
-            <span>Movies</span>
+            <Logo />
           </Link>
           {/* Mobile menu button */}
           <Button variant="ghost" size="icon" className="md:hidden ml-2" onClick={toggleMenu}>
