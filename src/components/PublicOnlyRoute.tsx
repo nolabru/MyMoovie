@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
@@ -14,9 +14,17 @@ const PublicOnlyRoute: React.FC<PublicOnlyRouteProps> = ({
   redirectTo = "/home" 
 }) => {
   const { user, loading } = useAuth();
+  const [isChecked, setIsChecked] = useState(false);
   
-  // Mostrar indicador de carregamento enquanto verifica autenticação
-  if (loading) {
+  useEffect(() => {
+    // Only mark as checked when loading is complete
+    if (!loading) {
+      setIsChecked(true);
+    }
+  }, [loading]);
+  
+  // Wait until authentication check is complete before making redirection decisions
+  if (!isChecked) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -24,12 +32,12 @@ const PublicOnlyRoute: React.FC<PublicOnlyRouteProps> = ({
     );
   }
   
-  // Se o usuário estiver logado, redirecionar para a rota especificada
+  // If the user is logged in, redirect to the specified route
   if (user) {
     return <Navigate to={redirectTo} replace />;
   }
   
-  // Caso contrário, renderizar os filhos (tela de splash)
+  // User is not authenticated, render the children (public content)
   return <>{children}</>;
 };
 

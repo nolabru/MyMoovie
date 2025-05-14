@@ -1,26 +1,22 @@
 
-import React, { useEffect } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 
 const Index = () => {
   const { user, loading } = useAuth();
-  const navigate = useNavigate();
+  const [isChecked, setIsChecked] = useState(false);
   
   useEffect(() => {
-    // Usar useEffect para evitar renderizações múltiplas
+    // Only mark as checked when loading is complete
     if (!loading) {
-      if (user) {
-        navigate("/home", { replace: true });
-      } else {
-        navigate("/apresentacao", { replace: true });
-      }
+      setIsChecked(true);
     }
-  }, [user, loading, navigate]);
+  }, [loading]);
   
-  // Durante o carregamento, mostra um indicador
-  if (loading) {
+  // Show loading indicator while authentication state is being determined
+  if (!isChecked) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -28,9 +24,12 @@ const Index = () => {
     );
   }
   
-  // Este return nunca deve ser atingido devido ao useEffect,
-  // mas é necessário para satisfazer o TypeScript
-  return null;
+  // Once authentication check is complete, redirect based on user state
+  if (user) {
+    return <Navigate to="/home" replace />;
+  }
+  
+  return <Navigate to="/apresentacao" replace />;
 };
 
 export default Index;

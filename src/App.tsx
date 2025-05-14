@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
@@ -23,11 +24,11 @@ import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
 
-// Componente melhorado para rotas protegidas com tratamento de loading
+// Improved ProtectedRoute component with better loading and auth state handling
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
-  // Se ainda estiver carregando o estado de autenticação, mostrar indicador de carregamento
+  // Show loading indicator while auth state is being determined
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -36,12 +37,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
-  // Se nenhum usuário estiver logado, redirecionar para a página de apresentação
+  // If no user is logged in, redirect to the presentation page
   if (!user) {
     return <Navigate to="/apresentacao" replace />;
   }
   
-  // Usuário está autenticado, mostrar o conteúdo protegido
+  // User is authenticated, render the protected content
   return <>{children}</>;
 };
 
@@ -55,10 +56,24 @@ const App = () => {
           <TitlesProvider>
             <BrowserRouter>
               <Routes>
-                {/* Rota raiz redireciona com base no estado de autenticação */}
+                {/* Simple redirect route that checks auth state */}
                 <Route path="/" element={<Index />} />
                 
-                {/* Dashboard - Acessível apenas quando logado */}
+                {/* Presentation page - only accessible when not logged in */}
+                <Route path="/apresentacao" element={
+                  <PublicOnlyRoute>
+                    <SplashScreen />
+                  </PublicOnlyRoute>
+                } />
+                
+                {/* Login page - only accessible when not logged in */}
+                <Route path="/login" element={
+                  <PublicOnlyRoute>
+                    <Auth />
+                  </PublicOnlyRoute>
+                } />
+                
+                {/* Protected routes - only accessible when logged in */}
                 <Route path="/home" element={
                   <ProtectedRoute>
                     <>
@@ -68,7 +83,6 @@ const App = () => {
                   </ProtectedRoute>
                 } />
                 
-                {/* Painel Admin - Acessível apenas com email admin */}
                 <Route path="/admin/categorias" element={
                   <AdminRoute>
                     <>
@@ -76,13 +90,6 @@ const App = () => {
                       <AdminCategories />
                     </>
                   </AdminRoute>
-                } />
-                
-                {/* Tela inicial como rota de apresentação pública */}
-                <Route path="/apresentacao" element={
-                  <PublicOnlyRoute>
-                    <SplashScreen />
-                  </PublicOnlyRoute>
                 } />
                 
                 <Route
@@ -96,6 +103,7 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 />
+                
                 <Route
                   path="/editar/:id"
                   element={
@@ -107,6 +115,7 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 />
+                
                 <Route
                   path="/lixeira"
                   element={
@@ -118,15 +127,9 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 />
-                <Route path="/login" element={<Auth />} />
                 
-                {/* Captura todas as rotas desconhecidas e garante redirecionamento 
-                   para login se não autenticado */}
-                <Route path="*" element={
-                  <ProtectedRoute>
-                    <NotFound />
-                  </ProtectedRoute>
-                } />
+                {/* Catch all unknown routes */}
+                <Route path="*" element={<NotFound />} />
               </Routes>
               <Sonner />
               <Toaster />
