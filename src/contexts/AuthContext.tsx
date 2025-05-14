@@ -29,40 +29,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const checkAdminStatus = async (): Promise<boolean> => {
     if (!user) return false;
 
+    setAdminLoading(true);
     try {
+      console.log("Verificando status de admin para:", user.email);
+      
       // Verificar diretamente se o email termina com @admin.com
       const isUserAdmin = user.email ? user.email.endsWith('@admin.com') : false;
+      
+      console.log("É admin?", isUserAdmin);
       setIsAdmin(isUserAdmin);
       return isUserAdmin;
     } catch (error: any) {
       console.error("Erro ao verificar status de admin:", error.message);
       return false;
+    } finally {
+      setAdminLoading(false);
     }
   };
 
   useEffect(() => {
-    // Verificar sessão atual
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-
-      // Se o usuário estiver logado, verifica se é admin
-      if (session?.user) {
-        checkAdminStatus();
-      }
-    });
-
-    // Configurar listener para mudanças de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_, session) => {
+    const setupAuth = async () => {
+      try {
+        // Verificar sessão atual
+        const { data: { session } } = await supabase.auth.getSession();
         setSession(session);
         setUser(session?.user ?? null);
         
         // Se o usuário estiver logado, verifica se é admin
         if (session?.user) {
-          setTimeout(() => {
-            checkAdminStatus();
+          await checkAdminStatus();
+        }
+        
+        setLoading(false);
+      } catch (error) {
+        console.error("Erro ao inicializar autenticação:", error);
+        setLoading(false);
+      }
+    };
+
+    setupAuth();
+
+    // Configurar listener para mudanças de autenticação
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_, session) => {
+        console.log("Estado de autenticação alterado:", !!session);
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          // Executamos o checkAdminStatus fora do callback principal
+          // para evitar problemas com o SDK do Supabase
+          setTimeout(async () => {
+            await checkAdminStatus();
           }, 0);
         } else {
           setIsAdmin(false);
@@ -98,6 +116,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       if (error) throw error;
+      
+      // Após fazer login, verificamos novamente o status de admin
+      // Com um pequeno atraso para garantir que o estado de autenticação foi atualizado
+      setTimeout(async () => {
+        await checkAdminStatus();
+      }, 100);
+      
       toast.success("Login realizado com sucesso!");
     } catch (error: any) {
       toast.error(error.message || "Erro ao fazer login");

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -41,9 +40,7 @@ const Admin: React.FC = () => {
         setVerifyingAccess(true);
         console.log("Admin.tsx: Verificando acesso administrativo para:", user.email);
         
-        // Adicionando um pequeno delay para garantir que o estado de autenticação está completamente estabelecido
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
+        // Verificamos explicitamente o status de admin
         const isUserAdmin = await checkAdminStatus();
         console.log("Admin.tsx: Resultado da verificação de admin:", isUserAdmin);
         
