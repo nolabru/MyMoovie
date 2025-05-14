@@ -37,7 +37,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Configurar listener para mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_, session) => {
+      (event, session) => {
+        console.log("Auth state changed:", event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -107,15 +108,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Função para logout
+  // Função para logout - melhorada para garantir limpeza correta do estado
   const signOut = async () => {
     try {
+      console.log("Signing out user:", user?.email);
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      
+      // Limpar estado local imediatamente, mesmo que haja erro no Supabase
+      // Isso evita problemas com o loop de redirecionamento
+      setUser(null);
+      setSession(null);
+      setIsAdmin(false);
+      
+      if (error) {
+        // Se o erro for "Session not found", podemos ignorar, pois já limpamos o estado
+        if (!error.message.includes("Session not found")) {
+          throw error;
+        } else {
+          console.log("Session not found, but continuing with local logout");
+        }
+      }
+      
       toast.success("Logout realizado com sucesso!");
     } catch (error: any) {
       toast.error(error.message || "Erro ao fazer logout");
-      throw error;
+      // Mesmo com erro, garantimos que o estado local está limpo
+      console.error("Logout error:", error);
     }
   };
 

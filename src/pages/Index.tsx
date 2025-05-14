@@ -1,20 +1,30 @@
 
-import React from "react";
-import { Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
-const Index = () => {
+const Index: React.FC = () => {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
   
-  // If loading, return null to prevent premature redirects
-  if (loading) return null;
+  useEffect(() => {
+    // Only redirect when loading is complete to prevent redirect loops
+    if (!loading) {
+      console.log("Index: Authentication state ready, redirecting", { user: !!user });
+      if (user) {
+        navigate("/home", { replace: true });
+      } else {
+        navigate("/apresentacao", { replace: true });
+      }
+    }
+  }, [user, loading, navigate]);
   
-  // If user is logged in, go to dashboard, otherwise to presentation
-  if (user) {
-    return <Navigate to="/home" replace />;
-  } else {
-    return <Navigate to="/apresentacao" replace />;
-  }
+  // Return loading state while authentication is being checked
+  return (
+    <div className="flex items-center justify-center h-screen">
+      <p className="text-muted-foreground">Carregando...</p>
+    </div>
+  );
 };
 
 export default Index;

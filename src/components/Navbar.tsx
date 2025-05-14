@@ -29,10 +29,20 @@ const Navbar: React.FC<NavbarProps> = ({
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+  
+  // Melhorado para não navegar imediatamente após o logout
   const handleSignOut = async () => {
-    await signOut();
-    navigate("/login");
+    try {
+      console.log("Starting logout process");
+      await signOut();
+      // Não navegar manualmente - deixar o sistema de rotas fazer isso
+      // O evento onAuthStateChange vai detectar a mudança e redirecionar
+      console.log("Logout successful, system will redirect automatically");
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
   };
+
   const getUserInitials = () => {
     if (!user || !user.email) return "U";
     return user.email.charAt(0).toUpperCase();

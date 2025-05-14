@@ -1,6 +1,6 @@
 
-import React from "react";
-import { Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface AdminRouteProps {
@@ -13,13 +13,25 @@ const AdminRoute: React.FC<AdminRouteProps> = ({
   redirectTo = "/" 
 }) => {
   const { user, loading, isAdmin } = useAuth();
+  const navigate = useNavigate();
   
-  // Se ainda estiver carregando os dados de autenticação, não mostra nada
-  if (loading) return null;
+  useEffect(() => {
+    // Redirecionamento apenas após carga completa dos dados de autenticação
+    if (!loading) {
+      if (!user || !isAdmin) {
+        console.log("AdminRoute: User not admin, redirecting to", redirectTo);
+        navigate(redirectTo, { replace: true });
+      }
+    }
+  }, [user, isAdmin, loading, navigate, redirectTo]);
   
-  // Se o usuário não estiver logado ou não for admin, redireciona
-  if (!user || !isAdmin) {
-    return <Navigate to={redirectTo} replace />;
+  // Se ainda estiver carregando ou usuário não for admin, mostra carregamento
+  if (loading || !user || !isAdmin) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-muted-foreground">Carregando...</p>
+      </div>
+    );
   }
   
   // Se o usuário for admin, renderiza o conteúdo administrativo
