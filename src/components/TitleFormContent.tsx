@@ -8,6 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCategories } from "@/hooks/use-categories";
 import { Upload, Star } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const TitleFormContent: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -120,7 +127,7 @@ const TitleFormContent: React.FC = () => {
           onClick={() => setRating(i)}
         >
           <Star 
-            className={`w-8 h-8 transition-all ${
+            className={`w-6 h-6 transition-all ${
               i <= (hoverRating || rating) 
                 ? "fill-yellow-400 text-yellow-400" 
                 : "text-gray-400"
@@ -136,7 +143,7 @@ const TitleFormContent: React.FC = () => {
   };
   
   return (
-    <div className="max-w-md mx-auto p-6 py-10 border border-border rounded-lg text-white">
+    <div className="max-w-md mx-auto p-6 py-8 my-6 border border-border rounded-lg text-white">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">
           {isEditMode ? "Editar Título" : "Novo Título"}
@@ -166,44 +173,50 @@ const TitleFormContent: React.FC = () => {
           <label htmlFor="type" className="block text-sm mb-1">
             Tipo
           </label>
-          <select
-            id="type"
-            value={type}
-            onChange={(e) => setType(e.target.value as TitleType)}
-            className="w-full p-2 rounded bg-transparent border border-gray-600 text-white focus:border-red-500"
+          <Select 
+            value={type} 
+            onValueChange={(value) => setType(value as TitleType)}
           >
-            <option value="filme">Filme</option>
-            <option value="série">Série</option>
-            <option value="novela">Novela</option>
-          </select>
+            <SelectTrigger className="w-full bg-transparent border-gray-600 text-white focus:border-red-500">
+              <SelectValue placeholder="Selecione o tipo" />
+            </SelectTrigger>
+            <SelectContent className="bg-background border-gray-600 text-white">
+              <SelectItem value="filme">Filme</SelectItem>
+              <SelectItem value="série">Série</SelectItem>
+              <SelectItem value="novela">Novela</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         
         <div>
           <label htmlFor="category" className="block text-sm mb-1">
             Categoria
           </label>
-          <select
-            id="category"
-            value={category}
-            onChange={(e) => setCategory(e.target.value as CategoryType)}
-            className="w-full p-2 rounded bg-transparent border border-gray-600 text-white focus:border-red-500"
+          <Select 
+            value={category} 
+            onValueChange={(value) => setCategory(value as CategoryType)}
             disabled={loadingCategories}
           >
-            {loadingCategories ? (
-              <option value="">Carregando categorias...</option>
-            ) : (
-              categories.map((cat) => (
-                <option key={cat.id} value={cat.name as CategoryType}>
-                  {cat.name.charAt(0).toUpperCase() + cat.name.slice(1)}
-                </option>
-              ))
-            )}
-          </select>
+            <SelectTrigger className="w-full bg-transparent border-gray-600 text-white focus:border-red-500">
+              <SelectValue placeholder={loadingCategories ? "Carregando categorias..." : "Selecione a categoria"} />
+            </SelectTrigger>
+            <SelectContent className="bg-background border-gray-600 text-white">
+              {loadingCategories ? (
+                <SelectItem value="carregando">Carregando categorias...</SelectItem>
+              ) : (
+                categories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.name as CategoryType}>
+                    {cat.name.charAt(0).toUpperCase() + cat.name.slice(1)}
+                  </SelectItem>
+                ))
+              )}
+            </SelectContent>
+          </Select>
         </div>
         
         <div>
           <label className="block text-sm mb-2">Avaliação</label>
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-3">
             {renderStars()}
             <span className="ml-3 text-sm">
               {rating} de 5 estrelas
