@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -135,7 +136,7 @@ const TitleFormContent: React.FC = () => {
   };
   
   return (
-    <div className="max-w-md mx-auto p-6 border border-border rounded-lg text-white">
+    <div className="max-w-md mx-auto p-6 py-10 border border-border rounded-lg text-white">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">
           {isEditMode ? "Editar Título" : "Novo Título"}

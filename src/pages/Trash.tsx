@@ -25,7 +25,7 @@ const TrashPage: React.FC = () => {
   };
   
   return (
-    <div className="container mx-auto py-6 px-4">
+    <div className="container mx-auto py-10 px-4">
       <div className="max-w-md mx-auto">
         {deletedTitles.length === 0 ? (
           <div className="text-center py-10 border border-border rounded-lg p-6">
