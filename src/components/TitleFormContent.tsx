@@ -6,10 +6,8 @@ import { useTitles } from "@/contexts/TitlesContext";
 import { TitleType, CategoryType } from "@/components/TitleCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
 import { useCategories } from "@/hooks/use-categories";
+import { Upload } from "lucide-react";
 
 const TitleFormContent: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,6 +23,7 @@ const TitleFormContent: React.FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [titleLoaded, setTitleLoaded] = useState<boolean>(false);
+  const [imageUrl, setImageUrl] = useState<string>("");
   
   const isEditMode = !!id;
   
@@ -75,12 +74,19 @@ const TitleFormContent: React.FC = () => {
     setLoading(true);
     
     try {
+      let finalImage = image;
+      
+      // Se tiver URL externa, usar ela
+      if (imageUrl && !imageFile) {
+        finalImage = imageUrl;
+      }
+      
       const titleData = {
         name,
         type,
         category,
         rating,
-        image
+        image: finalImage
       };
       
       if (isEditMode) {
@@ -99,133 +105,163 @@ const TitleFormContent: React.FC = () => {
     }
   };
   
-  // Tipos disponíveis
-  const types: TitleType[] = ["filme", "série", "novela"];
+  // Renderizar estrelas para avaliação
+  const renderStars = () => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <span 
+          key={i} 
+          className={`text-2xl cursor-pointer ${i <= rating ? "text-yellow-500" : "text-gray-400"}`}
+          onClick={() => setRating(i)}
+        >
+          ★
+        </span>
+      );
+    }
+    return stars;
+  };
   
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle>{isEditMode ? "Editar Título" : "Adicionar Título"}</CardTitle>
-        <CardDescription>
+    <div className="max-w-md mx-auto p-6 bg-black rounded-lg text-white">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">
+          {isEditMode ? "Editar Título" : "Novo Título"}
+        </h1>
+        <p className="text-gray-400 text-sm">
           {isEditMode 
-            ? "Atualize as informações do título existente" 
-            : "Preencha os dados para adicionar um novo título"}
-        </CardDescription>
-      </CardHeader>
+            ? "Atualize os detalhes do título existente"
+            : "Preencha os detalhes do novo título que deseja adicionar"}
+        </p>
+      </div>
       
-      <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
-          <div>
-            <label htmlFor="name" className="text-sm font-medium mb-1 block">
-              Nome
-            </label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Nome do título"
-              className="w-full"
-            />
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="name" className="block text-sm mb-1">
+            Nome do título
+          </label>
+          <Input
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Ex: Stranger Things"
+            className="w-full bg-gray-900 border-gray-800 text-white"
+          />
+        </div>
+        
+        <div>
+          <label htmlFor="type" className="block text-sm mb-1">
+            Tipo
+          </label>
+          <select
+            id="type"
+            value={type}
+            onChange={(e) => setType(e.target.value as TitleType)}
+            className="w-full p-2 rounded bg-gray-900 border border-gray-800 text-white"
+          >
+            <option value="filme">Filme</option>
+            <option value="série">Série</option>
+            <option value="novela">Novela</option>
+          </select>
+        </div>
+        
+        <div>
+          <label htmlFor="category" className="block text-sm mb-1">
+            Categoria
+          </label>
+          <select
+            id="category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value as CategoryType)}
+            className="w-full p-2 rounded bg-gray-900 border border-gray-800 text-white"
+            disabled={loadingCategories}
+          >
+            {loadingCategories ? (
+              <option value="">Carregando categorias...</option>
+            ) : (
+              categories.map((cat) => (
+                <option key={cat.id} value={cat.name as CategoryType}>
+                  {cat.name.charAt(0).toUpperCase() + cat.name.slice(1)}
+                </option>
+              ))
+            )}
+          </select>
+        </div>
+        
+        <div>
+          <label className="block text-sm mb-1">Avaliação</label>
+          <div className="flex items-center">
+            {renderStars()}
+            <span className="ml-2 text-sm">{rating} de 5 estrelas</span>
           </div>
-          
-          <div>
-            <label htmlFor="type" className="text-sm font-medium mb-1 block">
-              Tipo
-            </label>
-            <Select value={type} onValueChange={(value) => setType(value as TitleType)}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione o tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                {types.map((t) => (
-                  <SelectItem key={t} value={t}>
-                    {t.charAt(0).toUpperCase() + t.slice(1)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <label htmlFor="category" className="text-sm font-medium mb-1 block">
-              Categoria
-            </label>
-            <Select 
-              value={category} 
-              onValueChange={(value) => setCategory(value as CategoryType)}
-              disabled={loadingCategories}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder={loadingCategories ? "Carregando..." : "Selecione a categoria"} />
-              </SelectTrigger>
-              <SelectContent>
-                {loadingCategories ? (
-                  <SelectItem value="loading" disabled>Carregando categorias...</SelectItem>
-                ) : (
-                  categories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.name as CategoryType}>
-                      {cat.name.charAt(0).toUpperCase() + cat.name.slice(1)}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <label htmlFor="rating" className="text-sm font-medium mb-1 block">
-              Nota: {rating.toFixed(1)}
-            </label>
-            <Slider
-              value={[rating]}
-              min={0}
-              max={10}
-              step={0.1}
-              onValueChange={(values) => setRating(values[0])}
-              className="py-4"
-            />
-          </div>
-          
-          <div>
-            <label htmlFor="image" className="text-sm font-medium mb-1 block">
-              Imagem
-            </label>
-            <Input
-              id="image"
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="w-full"
-            />
-            
-            {image && (
-              <div className="mt-2">
-                <img
-                  src={image}
-                  alt="Preview"
-                  className="w-full max-h-48 object-cover rounded-md"
-                />
+        </div>
+        
+        <div>
+          <label className="block text-sm mb-1">Imagem</label>
+          <div 
+            className="border-2 border-dashed border-gray-600 rounded-lg p-4 text-center cursor-pointer hover:border-gray-400 transition-colors"
+            onClick={() => document.getElementById("imageInput")?.click()}
+          >
+            {image ? (
+              <img 
+                src={image} 
+                alt="Preview" 
+                className="max-h-48 object-contain mx-auto"
+              />
+            ) : (
+              <div className="py-8 flex flex-col items-center text-gray-400">
+                <Upload className="h-8 w-8 mb-2" />
+                <p>Clique para fazer upload</p>
+                <p className="text-xs mt-1">PNG, JPG ou WEBP (máx. 5MB)</p>
               </div>
             )}
+            <input
+              type="file"
+              id="imageInput"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="hidden"
+            />
           </div>
-        </CardContent>
+        </div>
         
-        <CardFooter className="flex justify-between">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate("/home")}
+        <div>
+          <label htmlFor="imageUrl" className="block text-sm mb-1">
+            Ou informe a URL da imagem
+          </label>
+          <Input
+            id="imageUrl"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            placeholder="https://exemplo.com/imagem.jpg"
+            className="w-full bg-gray-900 border-gray-800 text-white"
+          />
+          <p className="text-xs text-gray-400 mt-1">
+            Deixe em branco para usar uma imagem padrão
+          </p>
+        </div>
+        
+        <div className="flex space-x-3 pt-4">
+          <Button
             type="button"
+            variant="outline"
+            onClick={() => navigate("/home")}
+            className="w-1/2 bg-transparent border-gray-700 text-white hover:bg-gray-800"
           >
             Cancelar
           </Button>
-          <Button type="submit" disabled={loading}>
-            {loading 
-              ? (isEditMode ? "Salvando..." : "Adicionando...") 
+          <Button 
+            type="submit" 
+            disabled={loading}
+            className="w-1/2 bg-red-600 hover:bg-red-700 text-white"
+          >
+            {loading
+              ? (isEditMode ? "Salvando..." : "Adicionando...")
               : (isEditMode ? "Salvar" : "Adicionar")}
           </Button>
-        </CardFooter>
+        </div>
       </form>
-    </Card>
+    </div>
   );
 };
 
