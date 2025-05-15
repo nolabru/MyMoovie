@@ -3,7 +3,6 @@ import React from "react";
 import { TitleType, CategoryType } from "./TitleCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Filter, ArrowUpAZ, ArrowDownAZ } from "lucide-react";
-import { useCategories, Category } from "@/hooks/use-categories";
 
 type SortOption = "name_asc" | "name_desc" | "rating_asc" | "rating_desc" | null;
 
@@ -17,6 +16,7 @@ interface FiltersProps {
 }
 
 const types: TitleType[] = ['filme', 'série', 'novela'];
+const categories: CategoryType[] = ['comédia', 'terror', 'romance', 'ação', 'drama', 'ficção', 'animação', 'assistir'];
 
 const Filters: React.FC<FiltersProps> = ({
   typeFilter,
@@ -26,8 +26,6 @@ const Filters: React.FC<FiltersProps> = ({
   sortOption,
   setSortOption
 }) => {
-  const { categories, loading } = useCategories();
-  
   return <div className="mb-6 space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
@@ -57,15 +55,9 @@ const Filters: React.FC<FiltersProps> = ({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas as categorias</SelectItem>
-              {loading ? (
-                <SelectItem value="loading" disabled>Carregando...</SelectItem>
-              ) : (
-                categories.map(category => (
-                  <SelectItem key={category.id} value={category.name as CategoryType}>
-                    {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
-                  </SelectItem>
-                ))
-              )}
+              {categories.map(category => <SelectItem key={category} value={category}>
+                  {category.charAt(0).toUpperCase() + category.slice(1)}
+                </SelectItem>)}
             </SelectContent>
           </Select>
         </div>

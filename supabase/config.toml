@@ -1,8 +1,1 @@
-
 project_id = "ulfkuvsweviuggeznfkx"
-
-[realtime]
-enabled = true
-
-[realtime.tables]
-public_categories = "public.categories"
