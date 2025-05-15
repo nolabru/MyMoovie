@@ -127,7 +127,7 @@ const TitleFormContent: React.FC = () => {
           onClick={() => setRating(i)}
         >
           <Star 
-            className={`w-6 h-6 transition-all ${
+            className={`w-5 h-5 transition-all ${
               i <= (hoverRating || rating) 
                 ? "fill-yellow-400 text-yellow-400" 
                 : "text-gray-400"
@@ -143,7 +143,7 @@ const TitleFormContent: React.FC = () => {
   };
   
   return (
-    <div className="max-w-md mx-auto p-6 py-8 my-6 border border-border rounded-lg text-white">
+    <div className="max-w-md mx-auto p-6 py-6 my-8 border border-border rounded-lg text-white">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">
           {isEditMode ? "Editar Título" : "Novo Título"}
@@ -216,7 +216,7 @@ const TitleFormContent: React.FC = () => {
         
         <div>
           <label className="block text-sm mb-2">Avaliação</label>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-4">
             {renderStars()}
             <span className="ml-3 text-sm">
               {rating} de 5 estrelas

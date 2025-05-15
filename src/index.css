@@ -105,3 +105,17 @@
   opacity: 0;
   transition: opacity 0.2s ease-in-out;
 }
+
+/* Fix for SelectContent component to use proper background in dark mode */
+.dark [data-radix-select-content] {
+  @apply bg-background border-border;
+}
+
+/* Override for select dropdown items */
+.dark [data-radix-select-item] {
+  @apply text-foreground;
+}
+
+.dark [data-radix-select-item]:focus {
+  @apply bg-muted text-foreground;
+}
