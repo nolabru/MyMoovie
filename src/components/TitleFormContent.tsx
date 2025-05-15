@@ -7,7 +7,7 @@ import { TitleType, CategoryType } from "@/components/TitleCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCategories } from "@/hooks/use-categories";
-import { Upload } from "lucide-react";
+import { Upload, Star } from "lucide-react";
 
 const TitleFormContent: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +24,7 @@ const TitleFormContent: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [titleLoaded, setTitleLoaded] = useState<boolean>(false);
   const [imageUrl, setImageUrl] = useState<string>("");
+  const [hoverRating, setHoverRating] = useState<number | null>(null);
   
   const isEditMode = !!id;
   
@@ -105,25 +106,37 @@ const TitleFormContent: React.FC = () => {
     }
   };
   
-  // Renderizar estrelas para avaliação
+  // Renderizar estrelas para avaliação com design melhorado
   const renderStars = () => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
       stars.push(
-        <span 
+        <button
+          type="button"
           key={i} 
-          className={`text-2xl cursor-pointer ${i <= rating ? "text-yellow-500" : "text-gray-400"}`}
+          className="focus:outline-none"
+          onMouseEnter={() => setHoverRating(i)}
+          onMouseLeave={() => setHoverRating(null)}
           onClick={() => setRating(i)}
         >
-          ★
-        </span>
+          <Star 
+            className={`w-8 h-8 transition-all ${
+              i <= (hoverRating || rating) 
+                ? "fill-yellow-400 text-yellow-400" 
+                : "text-gray-400"
+            } ${
+              hoverRating && i <= hoverRating ? "scale-110" : ""
+            }`}
+            strokeWidth={1.5}
+          />
+        </button>
       );
     }
     return stars;
   };
   
   return (
-    <div className="max-w-md mx-auto p-6 bg-black rounded-lg text-white">
+    <div className="max-w-md mx-auto p-6 rounded-lg text-white">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">
           {isEditMode ? "Editar Título" : "Novo Título"}
@@ -135,7 +148,7 @@ const TitleFormContent: React.FC = () => {
         </p>
       </div>
       
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 bg-transparent">
         <div>
           <label htmlFor="name" className="block text-sm mb-1">
             Nome do título
@@ -145,7 +158,7 @@ const TitleFormContent: React.FC = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Ex: Stranger Things"
-            className="w-full bg-gray-900 border-gray-800 text-white"
+            className="w-full bg-transparent border-gray-600 text-white focus:border-red-500"
           />
         </div>
         
@@ -157,7 +170,7 @@ const TitleFormContent: React.FC = () => {
             id="type"
             value={type}
             onChange={(e) => setType(e.target.value as TitleType)}
-            className="w-full p-2 rounded bg-gray-900 border border-gray-800 text-white"
+            className="w-full p-2 rounded bg-transparent border border-gray-600 text-white focus:border-red-500"
           >
             <option value="filme">Filme</option>
             <option value="série">Série</option>
@@ -173,7 +186,7 @@ const TitleFormContent: React.FC = () => {
             id="category"
             value={category}
             onChange={(e) => setCategory(e.target.value as CategoryType)}
-            className="w-full p-2 rounded bg-gray-900 border border-gray-800 text-white"
+            className="w-full p-2 rounded bg-transparent border border-gray-600 text-white focus:border-red-500"
             disabled={loadingCategories}
           >
             {loadingCategories ? (
@@ -189,17 +202,19 @@ const TitleFormContent: React.FC = () => {
         </div>
         
         <div>
-          <label className="block text-sm mb-1">Avaliação</label>
-          <div className="flex items-center">
+          <label className="block text-sm mb-2">Avaliação</label>
+          <div className="flex items-center space-x-1">
             {renderStars()}
-            <span className="ml-2 text-sm">{rating} de 5 estrelas</span>
+            <span className="ml-3 text-sm">
+              {rating} de 5 estrelas
+            </span>
           </div>
         </div>
         
         <div>
           <label className="block text-sm mb-1">Imagem</label>
           <div 
-            className="border-2 border-dashed border-gray-600 rounded-lg p-4 text-center cursor-pointer hover:border-gray-400 transition-colors"
+            className="border-2 border-dashed border-gray-600 rounded-lg p-4 text-center cursor-pointer hover:border-gray-400 transition-colors bg-transparent"
             onClick={() => document.getElementById("imageInput")?.click()}
           >
             {image ? (
@@ -234,7 +249,7 @@ const TitleFormContent: React.FC = () => {
             value={imageUrl}
             onChange={(e) => setImageUrl(e.target.value)}
             placeholder="https://exemplo.com/imagem.jpg"
-            className="w-full bg-gray-900 border-gray-800 text-white"
+            className="w-full bg-transparent border-gray-600 text-white focus:border-red-500"
           />
           <p className="text-xs text-gray-400 mt-1">
             Deixe em branco para usar uma imagem padrão
@@ -246,7 +261,7 @@ const TitleFormContent: React.FC = () => {
             type="button"
             variant="outline"
             onClick={() => navigate("/home")}
-            className="w-1/2 bg-transparent border-gray-700 text-white hover:bg-gray-800"
+            className="w-1/2 bg-transparent border-gray-600 text-white hover:bg-gray-800"
           >
             Cancelar
           </Button>
