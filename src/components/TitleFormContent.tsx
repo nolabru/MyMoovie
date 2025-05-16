@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -194,6 +193,7 @@ const TitleFormContent: React.FC = () => {
           </label>
           <Select 
             value={category} 
+            defaultValue={category}
             onValueChange={(value) => setCategory(value as CategoryType)}
             disabled={loadingCategories}
           >
