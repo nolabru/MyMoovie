@@ -14,6 +14,9 @@ interface AuthContextType {
   signUp: (email: string, password: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  verifyResetCode: (email: string, token: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -142,6 +145,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Função para solicitar redefinição de senha
+  const resetPassword = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/auth?reset=true',
+      });
+      
+      if (error) throw error;
+      toast.success("Email de redefinição de senha enviado. Verifique sua caixa de entrada.");
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao solicitar redefinição de senha");
+      throw error;
+    }
+  };
+
+  // Função para verificar o código de redefinição
+  const verifyResetCode = async (email: string, token: string) => {
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token,
+        type: 'recovery',
+      });
+      
+      if (error) throw error;
+      toast.success("Código verificado com sucesso!");
+    } catch (error: any) {
+      toast.error(error.message || "Código inválido ou expirado");
+      throw error;
+    }
+  };
+
+  // Função para atualizar a senha
+  const updatePassword = async (password: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password,
+      });
+      
+      if (error) throw error;
+      toast.success("Senha atualizada com sucesso!");
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao atualizar senha");
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -154,6 +204,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signUp,
         signIn,
         signOut,
+        resetPassword,
+        verifyResetCode,
+        updatePassword,
       }}
     >
       {children}

@@ -3,13 +3,15 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import Logo from "@/components/Logo";
 import { useAuth } from "@/contexts/AuthContext";
+import PasswordReset from "@/components/auth/PasswordReset";
 const Auth: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const {
     signIn,
     signUp,
@@ -26,6 +28,7 @@ const Auth: React.FC = () => {
     confirmPassword: ""
   });
   const [loading, setLoading] = useState(false);
+  const [isResetMode, setIsResetMode] = useState(searchParams.get('reset') === 'true');
 
   // Redirecionar se já estiver autenticado
   useEffect(() => {
@@ -91,7 +94,16 @@ const Auth: React.FC = () => {
       setLoading(false);
     }
   };
-  return <div className="container flex items-center justify-center min-h-[80vh] py-8 px-4">
+
+  const handleForgotPassword = () => {
+    setIsResetMode(true);
+  };
+
+  const handleBackToLogin = () => {
+    setIsResetMode(false);
+  };
+  return (
+    <div className="container flex items-center justify-center min-h-[80vh] py-8 px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Logo />
@@ -101,83 +113,137 @@ const Auth: React.FC = () => {
           </p>
         </div>
         
-        <Tabs defaultValue="login" className="w-full">
-          <TabsList className="grid grid-cols-2 mb-6">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="register">Cadastro</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="login">
-            <Card>
-              <CardHeader>
-                <CardTitle>Login</CardTitle>
-                <CardDescription>
-                  Entre na sua conta para acessar seus títulos
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
-                    <Input id="login-email" name="email" type="email" placeholder="seu@email.com" value={loginData.email} onChange={handleLoginChange} disabled={loading} />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="login-password">Senha</Label>
-                      <Button variant="link" className="p-0 h-auto text-xs" type="button">
-                        Esqueceu a senha?
-                      </Button>
+        {isResetMode ? (
+          <PasswordReset onBack={handleBackToLogin} />
+        ) : (
+          <Tabs defaultValue="login" className="w-full">
+            <TabsList className="grid grid-cols-2 mb-6">
+              <TabsTrigger value="login">Login</TabsTrigger>
+              <TabsTrigger value="register">Cadastro</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="login">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Login</CardTitle>
+                  <CardDescription>
+                    Entre na sua conta para acessar seus títulos
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleLogin} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="login-email">Email</Label>
+                      <Input 
+                        id="login-email" 
+                        name="email" 
+                        type="email" 
+                        placeholder="seu@email.com" 
+                        value={loginData.email} 
+                        onChange={handleLoginChange} 
+                        disabled={loading} 
+                      />
                     </div>
-                    <Input id="login-password" name="password" type="password" value={loginData.password} onChange={handleLoginChange} disabled={loading} />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Entrando..." : "Entrar"}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="register">
-            <Card>
-              <CardHeader>
-                <CardTitle>Cadastro</CardTitle>
-                <CardDescription>
-                  Crie uma nova conta para começar a usar o ScreenTrack
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleRegister} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="register-name">Nome</Label>
-                    <Input id="register-name" name="name" placeholder="Seu nome" value={registerData.name} onChange={handleRegisterChange} disabled={loading} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="register-email">Email</Label>
-                    <Input id="register-email" name="email" type="email" placeholder="seu@email.com" value={registerData.email} onChange={handleRegisterChange} disabled={loading} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="register-password">Senha</Label>
-                    <Input id="register-password" name="password" type="password" value={registerData.password} onChange={handleRegisterChange} disabled={loading} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="register-confirm-password">
-                      Confirme a senha
-                    </Label>
-                    <Input id="register-confirm-password" name="confirmPassword" type="password" value={registerData.confirmPassword} onChange={handleRegisterChange} disabled={loading} />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Cadastrando..." : "Cadastrar"}
-                  </Button>
-                </form>
-              </CardContent>
-              <CardFooter className="flex justify-center text-sm text-muted-foreground">
-                Ao se cadastrar, você concorda com nossos termos de serviço e política de privacidade
-              </CardFooter>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="login-password">Senha</Label>
+                        <Button 
+                          variant="link" 
+                          className="p-0 h-auto text-xs" 
+                          type="button"
+                          onClick={handleForgotPassword}
+                        >
+                          Esqueceu a senha?
+                        </Button>
+                      </div>
+                      <Input 
+                        id="login-password" 
+                        name="password" 
+                        type="password" 
+                        value={loginData.password} 
+                        onChange={handleLoginChange} 
+                        disabled={loading} 
+                      />
+                    </div>
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? "Entrando..." : "Entrar"}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="register">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Cadastro</CardTitle>
+                  <CardDescription>
+                    Crie uma nova conta para começar a usar o MyMoovie
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleRegister} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="register-name">Nome</Label>
+                      <Input 
+                        id="register-name" 
+                        name="name" 
+                        placeholder="Seu nome" 
+                        value={registerData.name} 
+                        onChange={handleRegisterChange} 
+                        disabled={loading} 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="register-email">Email</Label>
+                      <Input 
+                        id="register-email" 
+                        name="email" 
+                        type="email" 
+                        placeholder="seu@email.com" 
+                        value={registerData.email} 
+                        onChange={handleRegisterChange} 
+                        disabled={loading} 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="register-password">Senha</Label>
+                      <Input 
+                        id="register-password" 
+                        name="password" 
+                        type="password" 
+                        value={registerData.password} 
+                        onChange={handleRegisterChange} 
+                        disabled={loading} 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="register-confirm-password">
+                        Confirme a senha
+                      </Label>
+                      <Input 
+                        id="register-confirm-password" 
+                        name="confirmPassword" 
+                        type="password" 
+                        value={registerData.confirmPassword} 
+                        onChange={handleRegisterChange} 
+                        disabled={loading} 
+                      />
+                    </div>
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? "Cadastrando..." : "Cadastrar"}
+                    </Button>
+                  </form>
+                </CardContent>
+                <CardFooter className="flex justify-center text-sm text-muted-foreground">
+                  Ao se cadastrar, você concorda com nossos termos de serviço e política de privacidade
+                </CardFooter>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        )}
       </div>
-    </div>;
+    </div>
+  );
 };
 export default Auth;
